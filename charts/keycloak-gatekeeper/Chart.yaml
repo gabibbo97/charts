@@ -3,12 +3,13 @@ appVersion: "4.6.0.Final"
 description: Keycloak gatekeeper
 name: keycloak-gatekeeper
 home: https://github.com/keycloak/keycloak-gatekeeper
+icon: https://raw.githubusercontent.com/keycloak/keycloak-misc/master/logo/keycloak_logo_600px.png
 keywords:
   - authentication
   - authorization
   - keycloak
   - proxy
-version: 1.0.0
+version: 1.0.1
 engine: gotpl
 maintainers:
   - name: gabibbo97
