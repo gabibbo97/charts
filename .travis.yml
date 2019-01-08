@@ -1,0 +1,35 @@
+language: minimal
+
+# Do not build gh-pages
+branches:
+  except:
+  - gh-pages
+
+jobs:
+  include:
+    - stage: Lint
+      addons:
+        apt:
+          packages:
+          - shellcheck
+      script:
+      - bash scripts/ci/lint-scripts.sh
+    - stage: Lint
+      before_script:
+      - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+      script:
+      - bash scripts/ci/lint-charts.sh
+    - stage: deploy
+      if: branch = master
+      cache:
+        directories:
+          - repo
+      before_script:
+      - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+      script:
+      - bash scripts/ci/package-charts.sh
+      deploy:
+        local-dir: repo
+        provider: pages
+        skip-cleanup: true
+        github-token: $GITHUB_TOKEN
