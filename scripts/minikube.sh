@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # Allow easy testing using minikube
 if [ -z "$1" ]; then
   printf '%s\n' \
