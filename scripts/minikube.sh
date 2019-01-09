@@ -9,6 +9,14 @@ fi
 CHART_NAME="$1"
 shift
 
+deleteChart() {
+  if helm ls --all | grep -q "$CHART_NAME"; then
+    helm delete --purge "$CHART_NAME" 2> /dev/null || true
+  fi
+}
+
+trap deleteChart EXIT ERR
+
 set -e
 # Startup
 minikubeStart() {
@@ -46,7 +54,6 @@ minikubeConfig
 # Helm setup
 helm init --wait
 # Helm upgrade
-helm upgrade "$CHART_NAME" "$CHART_NAME" --name "$CHART_NAME" --install "$@"
+helm upgrade "$CHART_NAME" "charts/$CHART_NAME" --install "$@"
 # Exit
 read -r -p "Press any key to destroy deployment"
-helm delete --purge "$CHART_NAME"
