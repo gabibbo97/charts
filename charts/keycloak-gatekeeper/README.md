@@ -2,7 +2,7 @@
 
 [Keycloak gatekeeper](https://github.com/keycloak/keycloak-gatekeeper) is an authentication proxy service which at the risk of stating the obvious integrates with the Keycloak authentication service.
 
-# TL;DR;
+## TL;DR
 
 ```bash
 helm install stable/keycloak-gatekeeper \
@@ -14,7 +14,7 @@ helm install stable/keycloak-gatekeeper \
     --set ingress.hosts[0]=my-svc-auth.example.com
 ```
 
-# Introduction
+## Introduction
 
 This chart bootstraps an authenticating proxy for a service.
 
@@ -22,7 +22,7 @@ Users accessing this service will be required to login and then they will be gra
 
 This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 
-# Configuration options
+## Configuration options
 
 | Parameter      | Description                                                | Default |
 | -------------- | ---------------------------------------------------------- | :-----: |
@@ -36,7 +36,7 @@ This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 | `resources`    | Specify fine grained rules for authentication              | `[]`    |
 | `debug`        | Use verbose logging                                        | `false` |
 
-# Setting up Keycloak
+## Setting up Keycloak
 
 After having installed Keycloak from its [Helm chart](https://github.com/helm/charts/tree/master/stable/keycloak)
 
@@ -46,7 +46,7 @@ After having installed Keycloak from its [Helm chart](https://github.com/helm/ch
 
 You can now use this new client from keycloak-gatekeeper
 
-# Fine grained rules for authentication
+## Fine grained rules for authentication
 
 This chart allows to specify rules inside of the `resource` array, these can be used to fine-tweak your authentication endpoints
 
