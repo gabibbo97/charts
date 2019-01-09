@@ -1,0 +1,32 @@
+{{- if .Values.imagePullSecrets }}
+###############################################################################
+# Deployed imagepullsecrets                                                   #
+# registry -> name of the secret                                              #
+###############################################################################
+
+{{- range $i, $pullSecret := .Values.imagePullSecrets }}
+{{ $pullSecret.registryURL }} -> {{ $pullSecret.secretName }}
+{{- end }}
+
+###############################################################################
+# Usage                                                                       #
+###############################################################################
+
+# Pod
+---
+kind: Pod
+...
+spec:
+  ...
+  imagePullSecrets:
+  - name: <<imagePullSecretName>>
+  ...
+
+# ServiceAccount
+---
+kind: ServiceAccount
+...
+imagePullSecrets:
+- name: <<imagePullSecretName>>
+...
+{{- end }}
