@@ -17,6 +17,9 @@ helm repo update
 
 ### Charts
 
+* [imagepullsecrets](charts/imagepullsecrets/README.md)
+* [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
+
 ### Scripts
 
 * `minikube.sh` allows launching the chart specified as first argument inside minikube
