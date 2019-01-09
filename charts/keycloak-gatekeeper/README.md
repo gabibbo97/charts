@@ -5,7 +5,7 @@
 ## TL;DR
 
 ```bash
-helm install stable/keycloak-gatekeeper \
+helm install gabibbo97/keycloak-gatekeeper \
     --set discoveryURL=https://keycloak.example.com/auth/realms/myrealm \
     --set upstreamURL=http://my-svc.my-namespace.svc.cluster.local:8088 \
     --set ClientID=myOIDCClientID \
