@@ -10,23 +10,23 @@ This Helm chart is a way to declaratively deploy imagepullsecrets to a Kubernete
 
 ```bash
 helm install gabibbo97/imagepullsecrets \
-  --set imagePullSecrets[0].registryURL="registry.k8s.example.com:5000" \
-  --set imagePullSecrets[0].secretName="registry-pullsecret" \
-  --set imagePullSecrets[0].username="user" \
-  --set imagePullSecrets[0].password="password"
+  --set imagePullSecret.registryURL="registry.k8s.example.com:5000" \
+  --set imagePullSecret.secretName="registry-pullsecret" \
+  --set imagePullSecret.username="user" \
+  --set imagePullSecret.password="password"
 ```
 
 ## Configuration options
 
-| Parameter                                 | Description                                                | Default |
-| ----------------------------------------- | ---------------------------------------------------------- | :-----: |
-| `addAuthField`                            | Add `auth: <base64 encode of user:pass>` to the secret     | `true`  |
-| `imagePullSecrets[n].registryURL`         | URL of the `n-th` registry                                 |  `""`   |
-| `imagePullSecrets[n].secretName`          | Name of the imagepullsecret object for the `n-th` registry |  `""`   |
-| `imagePullSecrets[n].username`            | Username for the `n-th` registry                           |  `""`   |
-| `imagePullSecrets[n].password`            | Password for the `n-th` registry                           |  `""`   |
-| `imagePullSecrets[n].annotations.<<KEY>>` | Annotations to set on the secret for the `n-th` registry   |  `{}`   |
-| `imagePullSecrets[n].labels.<<KEY>>`      | Labels to set on the secret for the `n-th` registry        |  `{}`   |
+| Parameter                              | Description                                            | Default |
+| -------------------------------------- | ------------------------------------------------------ | :-----: |
+| `addAuthField`                         | Add `auth: <base64 encode of user:pass>` to the secret | `true`  |
+| `imagePullSecrets.registryURL`         | URL of the registry                                    |  `""`   |
+| `imagePullSecrets.secretName`          | Name of the imagepullsecret object for the registry    |  `""`   |
+| `imagePullSecrets.username`            | Username for the registry                              |  `""`   |
+| `imagePullSecrets.password`            | Password for the registry                              |  `""`   |
+| `imagePullSecrets.annotations.<<KEY>>` | Annotations to set on the secret for the registry      |  `{}`   |
+| `imagePullSecrets.labels.<<KEY>>`      | Labels to set on the secret for the registry           |  `{}`   |
 
 ## Usage
 
