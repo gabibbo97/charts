@@ -17,7 +17,6 @@ helm repo update
 
 ### Charts
 
-* [imagepullsecrets](charts/imagepullsecrets/README.md)
 * [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
 
 ### Scripts
