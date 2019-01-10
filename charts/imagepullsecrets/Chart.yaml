@@ -6,7 +6,7 @@ keywords:
   - secrets
   - docker-registry
   - imagepullsecrets
-version: 1.0.0
+version: 1.0.1
 engine: gotpl
 maintainers:
   - name: gabibbo97
