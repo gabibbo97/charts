@@ -10,10 +10,10 @@ This Helm chart is a way to declaratively deploy imagepullsecrets to a Kubernete
 
 ```bash
 helm install gabibbo97/imagepullsecrets \
-  --set imagePullSecrets.registryURL=registry.k8s.example.com:5000 \
-  --set imagePullSecrets.secretName=registry-pullsecret \
-  --set imagePullSecrets.username=user \
-  --set imagePullSecrets.password=password
+  --set imagePullSecrets[0].registryURL="registry.k8s.example.com:5000" \
+  --set imagePullSecrets[0].secretName="registry-pullsecret" \
+  --set imagePullSecrets[0].username="user" \
+  --set imagePullSecrets[0].password="password"
 ```
 
 ## Configuration options
