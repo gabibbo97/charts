@@ -1,0 +1,196 @@
+###############################################################################
+# INSTALL                                                                     #
+###############################################################################
+{{/* Check for conflict */}}
+{{- if eq .Values.ingress.tls.secretName "dex-tls" }}
+{{- fail "'dex-tls' is used internally by the chart and should not be set as 'ingress.tls.secretName'" }}
+{{- end }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "dex.fullname" . }}-certs-creator
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "dex.fullname" . }}-certs-creator
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "dex.fullname" . }}-certs-creator
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "dex.fullname" . }}-certs-creator
+subjects:
+- kind: ServiceAccount
+  name: {{ include "dex.fullname" . }}-certs-creator
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "dex.fullname" . }}-create-certs
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  template:
+    metadata:
+      name: {{ include "dex.fullname" . }}-create-certs
+      labels:
+        app.kubernetes.io/name: {{ include "dex.name" . }}
+        helm.sh/chart: {{ include "dex.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+    spec:
+      serviceAccountName: {{ include "dex.fullname" . }}-certs-creator
+      restartPolicy: OnFailure
+      containers:
+      - name: create-certs
+        image: gabibbo97/kubectl:v1.13.2-alpine
+        imagePullPolicy: Always
+        command:
+          - /bin/sh
+          - -ec
+        args:
+          - |
+            if kubectl -n {{ .Release.Namespace }} get secret {{ include "dex.fullname" . }}-tls; then
+              printf 'Certificate already present\n'
+            else
+              apk add --no-cache openssl
+              printf 'Generating certificate\n'
+              openssl req -batch \
+                -new -x509 \
+                -newkey rsa:4096 -nodes \
+                -days 3650 \
+                -subj '/CN=Dex IDP/O=K8S/OU={{ .Release.Name }}/' \
+                -out dex.crt -keyout dex.key
+              printf 'Uploading certificate\n'
+              kubectl -n {{ .Release.Namespace }} create secret tls {{ include "dex.fullname" . }}-tls --cert dex.crt --key dex.key
+              printf 'Certificate deployed\n'
+            fi
+###############################################################################
+# CLEANUP                                                                     #
+###############################################################################
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "dex.fullname" . }}-certs-deleter
+  annotations:
+    helm.sh/hook: post-delete
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "dex.fullname" . }}-certs-deleter
+  annotations:
+    helm.sh/hook: post-delete
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "dex.fullname" . }}-certs-deleter
+  annotations:
+    helm.sh/hook: post-delete
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "dex.fullname" . }}-certs-deleter
+subjects:
+- kind: ServiceAccount
+  name: {{ include "dex.fullname" . }}-certs-deleter
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "dex.fullname" . }}-cleanup-certs
+  annotations:
+    helm.sh/hook: post-delete
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  template:
+    metadata:
+      name: {{ include "dex.fullname" . }}-cleanup-certs
+      labels:
+        app.kubernetes.io/name: {{ include "dex.name" . }}
+        helm.sh/chart: {{ include "dex.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+    spec:
+      serviceAccountName: {{ include "dex.fullname" . }}-certs-deleter
+      restartPolicy: OnFailure
+      containers:
+      - name: delete-certs
+        image: gabibbo97/kubectl:v1.13.2-alpine
+        imagePullPolicy: Always
+        command:
+          - /bin/sh
+          - -ec
+        args:
+          - |
+            kubectl -n {{ .Release.Namespace }} delete secret {{ include "dex.fullname" . }}-tls --ignore-not-found

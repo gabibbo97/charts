@@ -17,8 +17,11 @@ helm repo update
 
 ### Charts
 
+* [dex](charts/dex/README.md)
 * [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
+* [kuberos](charts/kuberos/README.md)
 
 ### Scripts
 
 * `minikube.sh` allows launching the chart specified as first argument inside minikube
+* `demos/kuberos.sh` allows testing on a local minikube instance OIDC authentication and authorization

@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kuberos.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "kuberos.name" . }}
+    helm.sh/chart: {{ include "kuberos.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "kuberos.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "kuberos.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "kuberos.fullname" . }}
+        - name: config-pad
+          emptyDir: {}
+        {{- if .Values.OIDCIssuerX509Secret }}
+        - name: issuer-secret
+          secret:
+            secretName: {{ .Values.OIDCIssuerX509Secret }}
+            items:
+            - key: tls.crt
+              path: OIDCIssuer.pem
+            optional: false
+        {{- end }}
+      initContainers:
+        - name: template-config
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |-
+              sed \
+                -e "s/CA_CRT/$(base64 < /var/run/secrets/kubernetes.io/serviceaccount/ca.crt | tr -d '\n')/g" \
+                < /etc/kuberos/config/template.yaml \
+                > /etc/kuberos/edited/template.yaml
+              cp /etc/kuberos/config/OIDCSecret /etc/kuberos/edited/OIDCSecret
+          volumeMounts:
+            - name: config
+              mountPath: /etc/kuberos/config
+            - name: config-pad
+              mountPath: /etc/kuberos/edited
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /kuberos
+          args:
+            - {{ .Values.OIDCIssuerURL }}
+            - {{ .Values.OIDCClientID }}
+            - /etc/kuberos/OIDCSecret
+            - /etc/kuberos/template.yaml
+            {{- if .Values.OIDCExtraScopes }}
+            - --scopes={{ join "," .Values.OIDCExtraScopes }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 10003
+          volumeMounts:
+            - name: config-pad
+              mountPath: /etc/kuberos
+          {{- if .Values.OIDCIssuerX509Secret }}
+            - name: issuer-secret
+              mountPath: /etc/ssl/certs
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

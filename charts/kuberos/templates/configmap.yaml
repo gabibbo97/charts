@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kuberos.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "kuberos.name" . }}
+    helm.sh/chart: {{ include "kuberos.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  template.yaml: |-
+    apiVersion: v1
+    kind: Config
+    current-context: {{ .Values.clusterName }}
+    clusters:
+    - name: production
+      cluster:
+        certificate-authority-data: CA_CRT
+        server: {{ .Values.clusterAPIEndpoint }}
+  OIDCSecret: {{ .Values.OIDCClientSecret | trim | quote }}

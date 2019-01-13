@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "dex.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "dex.name" . }}
+    helm.sh/chart: {{ include "dex.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: dex
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    {{- if .Values.ingress.annotations }}
+{{ toYaml .Values.ingress.annotations | indent 4 }}
+    {{- end }}
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{ include "dex.fullname" . }}
+          servicePort: https
+  {{- if .Values.ingress.tls.secretName }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
