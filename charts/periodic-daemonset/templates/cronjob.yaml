@@ -1,0 +1,53 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "periodic-daemonset.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "periodic-daemonset.name" . }}
+    helm.sh/chart: {{ include "periodic-daemonset.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "{{ .Values.schedule }}"
+  jobTemplate:
+    metadata:
+      name: {{ include "periodic-daemonset.fullname" . }}-controller
+      labels:
+        app.kubernetes.io/name: {{ include "periodic-daemonset.name" . }}
+        helm.sh/chart: {{ include "periodic-daemonset.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/component: controller
+    spec:
+      ttlSecondsAfterFinished: 60
+      template:
+        metadata:
+          name: {{ include "periodic-daemonset.fullname" . }}-controller
+          labels:
+            app.kubernetes.io/name: {{ include "periodic-daemonset.name" . }}
+            helm.sh/chart: {{ include "periodic-daemonset.chart" . }}
+            app.kubernetes.io/instance: {{ .Release.Name }}
+            app.kubernetes.io/managed-by: {{ .Release.Service }}
+            app.kubernetes.io/component: controller
+        spec:
+          serviceAccountName: {{ include "periodic-daemonset.fullname" . }}-controller
+          restartPolicy: Never
+          volumes:
+            - name: jobspec
+              configMap:
+                name: {{ include "periodic-daemonset.fullname" . }}
+                optional: false
+          containers:
+            - name: controller
+              image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              volumeMounts:
+                - name: jobspec
+                  mountPath: /etc/periodic-daemonset-data
+              command:
+                - /bin/sh
+                - -ec
+              args:
+                - |-
+{{ include "periodic-daemonset.script" . | indent 18 }}
