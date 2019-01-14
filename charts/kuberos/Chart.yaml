@@ -2,4 +2,4 @@ apiVersion: v1
 appVersion: "7bc1e72"
 description: OIDC authentication helper for Kubernetes
 name: kuberos
-version: 1.0.0
+version: 1.0.1

@@ -13,7 +13,7 @@ data:
     kind: Config
     current-context: {{ .Values.clusterName }}
     clusters:
-    - name: production
+    - name: {{ .Values.clusterName }}
       cluster:
         certificate-authority-data: CA_CRT
         server: {{ .Values.clusterAPIEndpoint }}
