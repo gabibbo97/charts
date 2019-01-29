@@ -34,7 +34,7 @@ endif
 
 # Script related targets
 scripts-lint: ## Lint all scripts
-	@$(foreach script,$(scripts),shellcheck -a -x $(script);)
+	@$(foreach script,$(scripts),shellcheck -x $(script);)
 
 # Meta-targets
 .DEFAULT_GOAL := help
