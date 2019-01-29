@@ -1,5 +1,11 @@
 language: minimal
 
+# Install make
+addons:
+  apt:
+    packages:
+      - shellcheck
+
 # Do not build gh-pages
 branches:
   except:
@@ -13,12 +19,12 @@ jobs:
           packages:
           - shellcheck
       script:
-      - bash scripts/ci/lint-scripts.sh
+      - make scripts-lint
     - stage: Lint
       before_script:
       - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
       script:
-      - bash scripts/ci/lint-charts.sh
+      - make chart-lint
     - stage: deploy
       if: branch = master
       cache:
@@ -27,7 +33,7 @@ jobs:
       before_script:
       - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
       script:
-      - bash scripts/ci/package-charts.sh
+      - make chart-package
       deploy:
         local-dir: repo
         provider: pages
