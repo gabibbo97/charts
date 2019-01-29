@@ -35,6 +35,9 @@ tolerations: []
 affinity: {}
 
 # Dex configuration
-connectors: []
+connectors:
+- type: mockCallback
+  id: mock
+  name: Example
 staticClients: []
 staticPasswords: []
