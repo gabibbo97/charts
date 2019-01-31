@@ -26,7 +26,7 @@ jobs:
       script:
       - make chart-lint
     - stage: deploy
-      if: branch = master
+      if: branch = master AND type != pull_request
       cache:
         directories:
           - repo
