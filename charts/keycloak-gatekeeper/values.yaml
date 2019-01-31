@@ -55,6 +55,9 @@ discoveryURL: ""
 # upstreamURL: http://my-service.my-namespace.svc.cluster.local:8088
 upstreamURL: ""
 
+# skip upstream url tls verification
+skip-upstream-tls-verify: false
+
 # OpenID ClientID and secret
 ClientID: ""
 ClientSecret: ""
