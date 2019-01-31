@@ -56,7 +56,7 @@ discoveryURL: ""
 upstreamURL: ""
 
 # skip upstream url tls verification
-skip-upstream-tls-verify: false
+skipUpstreamTlsVerify: false
 
 # OpenID ClientID and secret
 ClientID: ""
