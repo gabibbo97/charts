@@ -33,22 +33,11 @@ else
 	helm repo index repo
 endif
 
-# Kind tasks
-kind: ## Download kind
-	curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/0.1.0/kind-linux-amd64
-	chmod +x kind
-
-define kindconfig
-apiVersion: kind.sigs.k8s.io/v1alpha2\nkind: Config\nnodes:\n- role: control-plane\n- role: worker\n  replicas: 3
-endef
-
-kind-startup: kind ## Startup a KIND cluster
-	@echo -e "$(kindconfig)" > kind.yaml
-	./kind create cluster --config kind.yaml --wait 10m
-	@rm -f kind.yaml
-
-kind-stop: kind ## Stop a KIND cluster
-	./kind delete cluster
+# Testing targets
+test:
+	helm install --name mongodb charts/mongodb --wait --timeout 550
+	helm test mongodb
+	helm delete --purge mongodb
 
 # Script related targets
 scripts-lint: ## Lint all scripts

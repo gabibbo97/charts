@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+Kind: Pod
+metadata:
+  name: mongodb-e2e
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  containers:
+    - name: ping-test
+      image: {{ printf "%s:%s" .Values.images.tls.repository .Values.images.tls.tag }}
+      imagePullPolicy: {{ .Values.images.tls.pullPolicy }}
+      command:
+        - /bin/sh
+        - -ec
+      args:
+        - |
+          apt-get update && apt-get install --yes netcat
+          nc -z -w 5 {{ include "mongodb.fullname" . }}-router.{{ .Release.Namespace }}.svc.cluster.local 27017

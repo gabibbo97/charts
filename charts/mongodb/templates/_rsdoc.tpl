@@ -24,6 +24,6 @@ rs.initiate({
 {{- define "mongodb-shardsvr-sharddoc" -}}
 {{- range $i, $e := until (int .Values.topology.shards.servers) -}}
 {{- if ne $i 0 -}},{{ end }}
-{{ include "mongodb.fullname" $ }}-shard-<<I>>-shardsvr-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-<<I>>-shardsvr.{{ $.Release.Namespace }}.svc.cluster.local:27018
+{{ include "mongodb.fullname" $ }}-shard-${SHARD_INDEX}-shardsvr-{{ $i }}.{{ include "mongodb.fullname" $ }}-shard-${SHARD_INDEX}-shardsvr.{{ $.Release.Namespace }}.svc.cluster.local:27018
 {{- end -}}
 {{- end -}}

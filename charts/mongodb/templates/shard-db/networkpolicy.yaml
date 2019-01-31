@@ -1,65 +1,4 @@
 {{- if .Values.isolateClusterWithNetworkPolicy }}
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: {{ include "mongodb.fullname" . }}-configsvr
-  labels:
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/name: {{ include "mongodb.name" . }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
-    app.kubernetes.io/component: configsvr
-    helm.sh/chart: {{ include "mongodb.chart" . }}
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: {{ include "mongodb.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: configsvr
-  egress:
-  - ports:
-    - port: mongodb
-    to:
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/name: {{ include "mongodb.name" . }}
-          app.kubernetes.io/instance: {{ .Release.Name }}
-          app.kubernetes.io/component: configsvr
-    {{- range $i, $e := until (int .Values.topology.shards.count) }}
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/name: {{ include "mongodb.name" $ }}
-          app.kubernetes.io/instance: {{ $.Release.Name }}
-          app.kubernetes.io/component: shard-{{ $i }}-shardsvr
-    {{- end }}
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/name: {{ include "mongodb.name" . }}
-          app.kubernetes.io/instance: {{ .Release.Name }}
-          app.kubernetes.io/component: router
-  ingress:
-  - ports:
-    - port: mongodb
-    from:
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/name: {{ include "mongodb.name" . }}
-          app.kubernetes.io/instance: {{ .Release.Name }}
-          app.kubernetes.io/component: configsvr
-    {{- range $i, $e := until (int .Values.topology.shards.count) }}
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/name: {{ include "mongodb.name" $ }}
-          app.kubernetes.io/instance: {{ $.Release.Name }}
-          app.kubernetes.io/component: shard-{{ $i }}-shardsvr
-    {{- end }}
-    - podSelector:
-        matchLabels:
-          app.kubernetes.io/name: {{ include "mongodb.name" . }}
-          app.kubernetes.io/instance: {{ .Release.Name }}
-          app.kubernetes.io/component: router
-
 {{- range $i, $e := until (int .Values.topology.shards.count) }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -121,5 +60,6 @@ spec:
           app.kubernetes.io/name: {{ include "mongodb.name" $ }}
           app.kubernetes.io/instance: {{ $.Release.Name }}
           app.kubernetes.io/component: router
+
 {{- end }}
 {{- end }}
