@@ -1,0 +1,152 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mongodb.fullname" . }}-configsvr
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "mongodb.name" . }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: configsvr
+    helm.sh/chart: {{ include "mongodb.chart" . }}
+spec:
+  clusterIP: None
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ include "mongodb.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: configsvr
+  ports:
+    - name: mongodb
+      port: 27019
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mongodb.fullname" . }}-configsvr
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "mongodb.name" . }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: configsvr
+    helm.sh/chart: {{ include "mongodb.chart" . }}
+spec:
+  replicas: {{ .Values.topology.configServers }}
+  serviceName: {{ include "mongodb.fullname" . }}-configsvr
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "mongodb.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: configsvr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "mongodb.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: configsvr
+    spec:
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: tls
+          emptyDir: {}
+        - name: tls-ca
+          secret:
+            secretName: {{ include "mongodb.fullname" . }}-tls-ca
+            optional: false
+        - name: tls-ca-no-key
+          secret:
+            secretName: {{ include "mongodb.fullname" . }}-tls-ca
+            optional: false
+            items:
+              - key: tls.crt
+                path: tls.crt
+        - name: tls-scripts
+          configMap:
+            defaultMode: 0755
+            name: {{ include "mongodb.fullname" . }}-tls-scripts
+            optional: false
+        - name: storage
+          emptyDir: {}
+      initContainers:
+        - name: generate-tls
+          image: {{ printf "%s:%s" .Values.images.tls.repository .Values.images.tls.tag }}
+          imagePullPolicy: {{ .Values.images.tls.pullPolicy }}
+          command: [ '/opt/mongotls/tls.sh' ]
+          env:
+            - name: TLS_HELPER
+              value: SERVER
+            - name: CERT_CONCAT_TO
+              value: /etc/mongodb/tls/server.pem
+            - name: CA_CERTIFICATE
+              value: /etc/mongodb/ca/tls.crt
+            - name: CA_KEY
+              value: /etc/mongodb/ca/tls.key
+            - name: CLUSTER_NAME
+              value: {{ include "mongodb.fullname" . }}-configsvr
+            - name: RELEASE_NAME
+              value: {{ .Release.Name }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/mongodb/tls
+            - name: tls-ca
+              mountPath: /etc/mongodb/ca
+            - name: tls-scripts
+              mountPath: /opt/mongotls
+      containers:
+        - name: configsvr
+          image: {{ printf "%s:%s" .Values.images.database.repository .Values.images.database.tag }}
+          imagePullPolicy: {{ .Values.images.database.pullPolicy }}
+          command:
+            - mongod
+          args:
+            - --bind_ip_all
+            - --configsvr
+            - --auth
+            - --replSet=ConfigRS
+            - --sslMode=preferSSL
+            - --sslPEMKeyFile=/etc/mongodb/tls/server.pem
+            - --sslCAFile=/etc/mongodb/ca/tls.crt
+            - --clusterAuthMode=x509
+            - --sslAllowConnectionsWithoutCertificates
+          livenessProbe:
+            exec:
+              command:
+                - mongo
+                - --port=27019
+                - --eval
+                - "db.adminCommand({ ping : 1 })"
+          readinessProbe:
+            exec:
+              command:
+                - mongo
+                - --port=27019
+                - --eval
+                - "db.adminCommand({ ping : 1 })"
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/mongodb/tls
+            - name: tls-ca-no-key
+              mountPath: /etc/mongodb/ca
+            - name: storage
+              mountPath: /data/configdb
+          ports:
+            - name: mongodb
+              containerPort: 27019
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000

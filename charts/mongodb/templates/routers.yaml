@@ -1,0 +1,129 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mongodb.fullname" . }}-router
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "mongodb.name" . }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: router
+    helm.sh/chart: {{ include "mongodb.chart" . }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ include "mongodb.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: router
+  ports:
+    - name: mongodb
+      port: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mongodb.fullname" . }}-router
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "mongodb.name" . }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/component: router
+    helm.sh/chart: {{ include "mongodb.chart" . }}
+spec:
+  replicas: {{ .Values.topology.routers }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "mongodb.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: router
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "mongodb.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: router
+    spec:
+      volumes:
+        - name: tls
+          emptyDir: {}
+        - name: tls-ca
+          secret:
+            secretName: {{ include "mongodb.fullname" . }}-tls-ca
+            optional: false
+        - name: tls-ca-no-key
+          secret:
+            secretName: {{ include "mongodb.fullname" . }}-tls-ca
+            optional: false
+            items:
+              - key: tls.crt
+                path: tls.crt
+        - name: tls-scripts
+          configMap:
+            defaultMode: 0755
+            name: {{ include "mongodb.fullname" . }}-tls-scripts
+            optional: false
+      initContainers:
+        - name: generate-tls
+          image: {{ printf "%s:%s" .Values.images.tls.repository .Values.images.tls.tag }}
+          imagePullPolicy: {{ .Values.images.tls.pullPolicy }}
+          command: [ '/opt/mongotls/tls.sh' ]
+          env:
+            - name: TLS_HELPER
+              value: SERVER
+            - name: CERT_CONCAT_TO
+              value: /etc/mongodb/tls/server.pem
+            - name: CA_CERTIFICATE
+              value: /etc/mongodb/ca/tls.crt
+            - name: CA_KEY
+              value: /etc/mongodb/ca/tls.key
+            - name: CLUSTER_NAME
+              value: {{ include "mongodb.fullname" . }}-router
+            - name: RELEASE_NAME
+              value: {{ .Release.Name }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/mongodb/tls
+            - name: tls-ca
+              mountPath: /etc/mongodb/ca
+            - name: tls-scripts
+              mountPath: /opt/mongotls
+      containers:
+        - name: router
+          image: {{ printf "%s:%s" .Values.images.database.repository .Values.images.database.tag }}
+          imagePullPolicy: {{ .Values.images.database.pullPolicy }}
+          command:
+            - mongos
+          args:
+            - --bind_ip_all
+            - --configdb=ConfigRS/{{ include "mongodb.fullname" . }}-configsvr-0.{{ include "mongodb.fullname" . }}-configsvr.{{ .Release.Namespace }}.svc.cluster.local:27019
+            - --sslMode=preferSSL
+            - --sslPEMKeyFile=/etc/mongodb/tls/server.pem
+            - --sslCAFile=/etc/mongodb/ca/tls.crt
+            - --clusterAuthMode=x509
+            - --sslAllowConnectionsWithoutCertificates
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/mongodb/tls
+            - name: tls-ca-no-key
+              mountPath: /etc/mongodb/ca
+          ports:
+            - name: mongodb
+              containerPort: 27017
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            readOnlyRootFilesystem: false

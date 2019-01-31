@@ -1,0 +1,11 @@
+apiVersion: v1
+appVersion: "4.0.5"
+description: MongoDB Object Oriented database
+name: mongodb
+version: 0.0.1
+home: https://www.mongodb.com
+sources:
+  - https://github.com/mongodb/mongo
+maintainers:
+  - name: Giacomo Longo
+    email: gabibbo97@gmail.com
