@@ -34,10 +34,10 @@ else
 endif
 
 # Testing targets
-test:
-	helm install --name mongodb charts/mongodb --wait --timeout 550
-	helm test mongodb
-	helm delete --purge mongodb
+test-mongo:
+	@scripts/tests/mongo.sh
+
+test: test-mongo
 
 # Script related targets
 scripts-lint: ## Lint all scripts
