@@ -19,3 +19,4 @@ spec:
   ports:
     - name: mongodb
       port: 27017
+      targetPort: 27017

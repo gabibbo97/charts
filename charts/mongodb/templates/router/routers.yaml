@@ -27,10 +27,6 @@ spec:
       volumes:
         - name: tls
           emptyDir: {}
-        - name: tls-ca
-          secret:
-            secretName: {{ include "mongodb.fullname" . }}-tls-ca
-            optional: false
         - name: tls-ca-no-key
           secret:
             secretName: {{ include "mongodb.fullname" . }}-tls-ca
@@ -38,25 +34,31 @@ spec:
             items:
               - key: tls.crt
                 path: tls.crt
-        - name: tls-scripts
+        - name: scripts
           configMap:
             defaultMode: 0755
-            name: {{ include "mongodb.fullname" . }}-tls-scripts
+            name: {{ include "mongodb.fullname" . }}-scripts
             optional: false
       initContainers:
         - name: generate-tls
           image: {{ printf "%s:%s" .Values.images.tls.repository .Values.images.tls.tag }}
           imagePullPolicy: {{ .Values.images.tls.pullPolicy }}
-          command: [ '/opt/mongotls/tls.sh' ]
+          command: [ '/opt/mongoscripts/server-tls.sh' ]
           env:
-            - name: TLS_HELPER
-              value: SERVER
-            - name: CERT_CONCAT_TO
-              value: /etc/mongodb/tls/server.pem
-            - name: CA_CERTIFICATE
-              value: /etc/mongodb/ca/tls.crt
+            - name: CA_CRT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.fullname" . }}-tls-ca
+                  key: tls.crt
+                  optional: false
             - name: CA_KEY
-              value: /etc/mongodb/ca/tls.key
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mongodb.fullname" . }}-tls-ca
+                  key: tls.key
+                  optional: false
+            - name: CERT_DIR
+              value: /etc/mongodb/tls
             - name: CLUSTER_NAME
               value: {{ include "mongodb.fullname" . }}-router
             - name: RELEASE_NAME
@@ -76,10 +78,8 @@ spec:
           volumeMounts:
             - name: tls
               mountPath: /etc/mongodb/tls
-            - name: tls-ca
-              mountPath: /etc/mongodb/ca
-            - name: tls-scripts
-              mountPath: /opt/mongotls
+            - name: scripts
+              mountPath: /opt/mongoscripts
       containers:
         - name: router
           image: {{ printf "%s:%s" .Values.images.database.repository .Values.images.database.tag }}

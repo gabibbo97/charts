@@ -15,95 +15,44 @@ To generate quickly
   rm ca.crt ca.key
 {{- end }}
 
-{{- if .Release.IsInstall }}
-### MANUAL STEPS #########################
+### Config replica set initialization
+kubectl exec -it {{ include "mongodb.fullname" . }}-configsvr-0 -- mongo --port 27019 --eval 'rs.initiate({{ include "mongodb.configrs" . | nospace }})'
 
-#### RS INITIALIZATION ###################
-##### RS INITIALIZATION (Config) #########
-  kubectl --namespace {{ .Release.Namespace }} exec {{ include "mongodb.fullname" . }}-configsvr-0 -- mongo --port 27019 --eval {{ include "mongodb-configsvr-rsdoc" . | nospace | quote }}
+### Config replica set document
+{{ include "mongodb.configrs" . | nospace }}
+
 {{- range $i, $e := until (int .Values.topology.shards.count) }}
-##### RS INITIALIZATION (Shard {{ $i }}) #
-  kubectl --namespace {{ $.Release.Namespace }} exec {{ include "mongodb.fullname" $ }}-shard-{{ $i }}-shardsvr-0 -- mongo --port 27018 --eval {{ include "mongodb-shardsvr-rsdoc" $ | replace "<<I>>" (toString $i) | nospace | quote }}
+
+### Shard {{ $i }} replica set initialization
+kubectl exec -it {{ include "mongodb.fullname" $ }}-shard-{{ $i }}-shardsvr-0 -- mongo --port 27018 --eval 'rs.initiate({{ include "mongodb.shardrs" $ | replace "${SHARD_INDEX}" (toString $i) | nospace }})'
+
+### Shard {{ $i }} replica set document
+{{ include "mongodb.shardrs" $ | replace "${SHARD_INDEX}" (toString $i) | nospace }}
+
+### Shard {{ $i }} add command
+kubectl -n {{ $.Release.Namespace }} exec $(kubectl -n {{ $.Release.Namespace }} get pod -l 'app.kubernetes.io/name={{ include "mongodb.name" $ }},app.kubernetes.io/instance={{ $.Release.Name }},app.kubernetes.io/component=router' -o jsonpath='{.items[0].metadata.name}') \
+  -- \
+mongo --port 27017 --eval '{{ include "mongodb.shardadd" $ | replace "${SHARD_INDEX}" (toString $i) | nospace }}'
+
+### Shard {{ $i }} add command
+{{ include "mongodb.shardadd" $ | replace "${SHARD_INDEX}" (toString $i) | nospace }}
 {{- end }}
 
-#### SHARD BOOTSTRAPPING #################
-  export MONGODB_ROUTER_POD="$(kubectl --namespace {{ .Release.Namespace }} get pod -l "app.kubernetes.io/name={{ include "mongodb.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=router" -o jsonpath={.items[0].metadata.name})"
-{{- range $i, $e := until (int .Values.topology.shards.count) }}
-  kubectl --namespace {{ $.Release.Namespace }} exec "$MONGODB_ROUTER_POD" -- mongo --port 27017 --eval 'sh.addShard("Shard{{ $i }}RS/{{ include "mongodb-shardsvr-sharddoc" $ | replace "<<I>>" (toString $i) | nospace }}")'
-{{- end }}
+### Create user command
+kubectl -n {{ $.Release.Namespace }} exec $(kubectl -n {{ $.Release.Namespace }} get pod -l 'app.kubernetes.io/name={{ include "mongodb.name" $ }},app.kubernetes.io/instance={{ $.Release.Name }},app.kubernetes.io/component=router' -o jsonpath='{.items[0].metadata.name}') \
+  -- \
+mongo --port 27017 --eval 'db.getSiblingDB("$external").runCommand({{ include "mongodb.createuser" . | nospace }})'
 
-#### USER BOOTSTRAPPING #################
-  kubectl --namespace {{ .Release.Namespace }} create secret generic {{ include "mongodb.fullname" . }}-credentials --from-literal=root="$(tr -cd 'a-zA-Z0-9' < /dev/urandom | head -c 64)"
-  export MONGODB_ROUTER_POD="$(kubectl --namespace {{ .Release.Namespace }} get pod -l "app.kubernetes.io/name={{ include "mongodb.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=router" -o jsonpath={.items[0].metadata.name})"
-  kubectl --namespace {{ .Release.Namespace }} exec "$MONGODB_ROUTER_POD" -- mongo --port 27017 --eval "db.getSiblingDB(\"admin\").createUser({\"user\": \"root\", \"pwd\":\"$(kubectl --namespace {{ .Release.Namespace }} get secret {{ include "mongodb.fullname" . }}-credentials -o jsonpath='{.data.root}' | base64 -d)\", \"roles\": [{\"role\":\"root\",\"db\":\"admin\"}]})"
-{{- end }}
+### Generate client
+export SUBJECT="/CN=${USER_NAME}/OU=Users/O=MongoDB-{{ .Release.Name }}/"
+openssl genrsa 4096 > client.key
+openssl req -batch -new -key client.key -subj "${SUBJECT}" -out client.csr
+kubectl -n {{ .Release.Namespace }} get secret {{ include "mongodb.fullname" . }}-tls-ca -o jsonpath='{.data.tls\.crt}' | base64 -d > ca.crt
+kubectl -n {{ .Release.Namespace }} get secret {{ include "mongodb.fullname" . }}-tls-ca -o jsonpath='{.data.tls\.key}' | base64 -d > ca.key
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -days 3650 -sha512 -out client.crt
 
-{{- if .Release.IsUpgrade }}
-### MANUAL STEPS #########################
+openssl x509 -in client.crt -text -noout
 
-#### RS INITIALIZATION ###################
-##### RS INITIALIZATION (Config) #########
-  kubectl --namespace {{ .Release.Namespace }} exec {{ include "mongodb.fullname" . }}-configsvr-0 -- mongo --port 27019 --eval {{ include "mongodb-configsvr-rsdoc" . | nospace | quote }}
-{{- range $i, $e := until (int .Values.topology.shards.count) }}
-##### RS INITIALIZATION (Shard {{ $i }}) #
-  kubectl --namespace {{ $.Release.Namespace }} exec {{ include "mongodb.fullname" $ }}-shard-{{ $i }}-shardsvr-0 -- mongo --port 27018 --eval {{ include "mongodb-shardsvr-rsdoc" $ | replace "<<I>>" (toString $i) | nospace | quote }}
-{{- end }}
+### Port-forward
 
-#### RS RECONFIGURATION ##################
-##### RS RECONFIGURATION  ################
-PORT is:
-  27018   Shard server
-  27019   Configuration server
-
-export DB_PORT="27018"
-export POD_NAME="myPod"
-
-Get replica set status:
-  kubectl --namespace {{ .Release.Namespace }} exec "${POD_NAME}" -- mongo --port "${DB_PORT}" --eval 'rs.status()'
-  export PRIMARY="myPod"
-
-Add a host (run only on PRIMARY):
-  export NEW_ID="1"
-  export NEW_HOST="mongodb-1"
-  export NEW_PORT="27017"
-  kubectl --namespace {{ .Release.Namespace }} exec "${PRIMARY}" -- mongo --port "${DB_PORT}" --eval "rs.add({_id: ${NEW_ID}, host: \"${NEW_HOST}:${NEW_PORT}\"})"
-
-Remove a host (run only on PRIMARY):
-  export REMOVE_HOST="mongodb-1"
-  kubectl --namespace {{ .Release.Namespace }} exec "${PRIMARY}" -- mongo --port "${DB_PORT}" --eval "rs.remove(\"${REMOVE_HOST}\")"
-
-#### SHARD BOOTSTRAPPING #################
-  export SHARD_INDEX="0"
-  export MONGODB_ROUTER_POD="$(kubectl --namespace {{ .Release.Namespace }} get pod -l "app.kubernetes.io/name={{ include "mongodb.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=router" -o jsonpath={.items[0].metadata.name})"
-  export MONGODB_ROOT_PASSWORD="$(kubectl --namespace {{ .Release.Namespace }} get secret {{ include "mongodb.fullname" . }}-credentials -o jsonpath='{.data.root}' | base64 -d)"
-  kubectl --namespace {{ $.Release.Namespace }} exec "$MONGODB_ROUTER_POD" -- mongo -u 'root' -p "$MONGODB_ROOT_PASSWORD" --authenticationDatabase admin --port 27017 --eval "sh.addShard(\"Shard${SHARD_INDEX}RS/{{ include "mongodb-shardsvr-sharddoc" . | nospace }}\")"
-
-#### SHARD REMOVAL #######################
-  export MONGODB_ROUTER_POD="$(kubectl --namespace {{ .Release.Namespace }} get pod -l "app.kubernetes.io/name={{ include "mongodb.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=router" -o jsonpath={.items[0].metadata.name})"
-  export MONGODB_ROOT_PASSWORD="$(kubectl --namespace {{ .Release.Namespace }} get secret {{ include "mongodb.fullname" . }}-credentials -o jsonpath='{.data.root}' | base64 -d)"
-
-List shards:
-  kubectl --namespace {{ $.Release.Namespace }} exec "$MONGODB_ROUTER_POD" -- mongo -u 'root' -p "$MONGODB_ROOT_PASSWORD" --authenticationDatabase admin --port 27017 --eval 'sh.status()'
-
-Delete shard:
-  export SHARD_NAME="myShard"
-  kubectl --namespace {{ $.Release.Namespace }} exec "$MONGODB_ROUTER_POD" -- mongo -u 'root' -p "$MONGODB_ROOT_PASSWORD" --authenticationDatabase admin --port 27017 --eval "db.adminCommand( { removeShard: \"${SHARD_NAME}\" } )"
-
-If the 'dbsToMove' specifies a database, then perform deletion:
-  export DB_TO_MOVE="myDB"
-  export DESTINATION_SHARD="destShard"
-  kubectl --namespace {{ $.Release.Namespace }} exec "$MONGODB_ROUTER_POD" -- mongo -u 'root' -p "$MONGODB_ROOT_PASSWORD" --authenticationDatabase admin --port 27017 --eval "db.runCommand( { movePrimary: \"${DB_TO_MOVE}\", to: \"${DESTINATION_SHARD}\" })"
-{{- end }}
-
-### GET ROOT USER CREDENTIALS
-  printf 'Root password: %s\n' "$(kubectl --namespace {{ .Release.Namespace }} get secret {{ include "mongodb.fullname" . }}-credentials -o jsonpath='{.data.root}' | base64 -d)"
-
-### LAUNCH A COMMAND ON THE CLUSTER
-  export MONGODB_ROUTER_POD="$(kubectl --namespace {{ .Release.Namespace }} get pod -l "app.kubernetes.io/name={{ include "mongodb.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=router" -o jsonpath={.items[0].metadata.name})"
-  export MONGODB_ROOT_PASSWORD="$(kubectl --namespace {{ .Release.Namespace }} get secret {{ include "mongodb.fullname" . }}-credentials -o jsonpath='{.data.root}' | base64 -d)"
-  export MONGO_COMMAND="sh.status()"
-  kubectl --namespace {{ .Release.Namespace }} exec "$MONGODB_ROUTER_POD" -- mongo -u 'root' -p "$MONGODB_ROOT_PASSWORD" --authenticationDatabase admin --port 27017 --eval "$MONGO_COMMAND"
-
-### PORT FORWARD to 127.0.0.1:27017
-  export MONGODB_ROUTER_POD="$(kubectl --namespace {{ .Release.Namespace }} get pod -l "app.kubernetes.io/name={{ include "mongodb.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=router" -o jsonpath={.items[0].metadata.name})"
-  kubectl --namespace {{ .Release.Namespace }} port-forward "$MONGODB_ROUTER_POD" 27017
+kubectl -n {{ .Release.Namespace }} port-forward $(kubectl -n {{ .Release.Namespace }} get pod -l 'app.kubernetes.io/name={{ include "mongodb.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=router' -o jsonpath='{.items[0].metadata.name}') 27017

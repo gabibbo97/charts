@@ -4,36 +4,14 @@
 ######################
 ---
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "mongodb.fullname" . }}-tls-ca-delete-scripts
-  annotations:
-    helm.sh/hook: post-delete
-    helm.sh/hook-weight: "-100"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
-data:
-  tls.sh: |
-{{ .Files.Get "scripts/tls.sh" | indent 4 }}
-  uploadca.sh: |
-{{ .Files.Get "scripts/uploadca.sh" | indent 4 }}
----
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ include "mongodb.fullname" . }}-tls-ca-deleter
-  annotations:
-    helm.sh/hook: post-delete
-    helm.sh/hook-weight: "-100"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ include "mongodb.fullname" . }}-secret-deleter
-  annotations:
-    helm.sh/hook: post-delete
-    helm.sh/hook-weight: "-100"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -43,10 +21,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "mongodb.fullname" . }}-tls-ca-deleter
-  annotations:
-    helm.sh/hook: post-delete
-    helm.sh/hook-weight: "-100"
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
 roleRef:
   apiVersion: rbac.authorization.k8s.io
   kind: Role
@@ -60,8 +34,7 @@ kind: Job
 metadata:
   name: {{ include "mongodb.fullname" . }}-delete-tls-ca
   annotations:
-    helm.sh/hook: post-delete
-    helm.sh/hook-weight: "-10"
+    helm.sh/hook: pre-delete
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
 spec:
   template:
@@ -72,10 +45,10 @@ spec:
       serviceAccountName: {{ include "mongodb.fullname" . }}-tls-ca-deleter
       restartPolicy: Never
       volumes:
-      - name: tls-scripts
+      - name: scripts
         configMap:
           defaultMode: 0755
-          name: {{ include "mongodb.fullname" . }}-tls-ca-delete-scripts
+          name: {{ include "mongodb.fullname" . }}-scripts
           optional: false
       containers:
         - name: delete-tls
@@ -87,6 +60,6 @@ spec:
             - name: SECRET_NAME
               value: {{ include "mongodb.fullname" . }}-tls-ca
           volumeMounts:
-            - name: tls-scripts
+            - name: scripts
               mountPath: /opt/mongoscripts
 {{- end }}

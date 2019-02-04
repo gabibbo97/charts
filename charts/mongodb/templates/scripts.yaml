@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "mongodb.fullname" . }}-tls-scripts
+  name: {{ include "mongodb.fullname" . }}-scripts
   labels:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -10,5 +10,7 @@ metadata:
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
     helm.sh/chart: {{ include "mongodb.chart" . }}
 data:
-  tls.sh: |
-{{ .Files.Get "scripts/tls.sh" | indent 4 }}
+{{- range $path, $bytes := .Files.Glob "scripts/*.sh" }}
+  {{ base $path }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}

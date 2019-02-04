@@ -25,21 +25,6 @@ jobs:
       - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
       script:
       - make chart-lint
-    - stage: Functional testing
-      language: go
-      services:
-        - docker
-      before_script:
-        - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.13.2/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-        - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
-        - go get sigs.k8s.io/kind
-        - kind create cluster
-        - export KUBECONFIG="$(kind get kubeconfig-path)"
-        - kubectl --namespace kube-system create sa tiller
-        - kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-        - helm init --wait --service-account tiller
-      script:
-        - make test
     - stage: deploy
       if: branch = master AND type != pull_request
       cache:

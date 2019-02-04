@@ -8,8 +8,8 @@ images:
     tag: "4.0.5"
     pullPolicy: IfNotPresent
   tls:
-    repository: ubuntu
-    tag: "18.04"
+    repository: debian
+    tag: "9"
     pullPolicy: Always
 
 # Topology configuration
@@ -18,7 +18,7 @@ topology:
   configServers: 3
   shards:
     # How many shards
-    count: 3
+    count: 1
     # How many servers for each shard
     servers: 3
   # How many routers
@@ -40,3 +40,8 @@ tls:
     #   manual        TLS certificate generation is manual
     #   script        Use scripts to generate certificates
     managementMode: script
+
+# Persistent volumes
+persistentVolumeClaims:
+  enabled: false
+  size: 2Gi
