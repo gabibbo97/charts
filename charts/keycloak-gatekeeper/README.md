@@ -34,7 +34,7 @@ This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 | `scopes`       | Additional required scopes for authentication              | `[]`    |
 | `addClaims`    | Set these claims as headers in the request for the backend | `[]`    |
 | `matchClaims`  | Key-Value pairs that the JWT should contain                | `{}`    |
-| `resources`    | Specify fine grained rules for authentication              | `[]`    |
+| `rules`        | Specify fine grained rules for authentication              | `[]`    |
 | `debug`        | Use verbose logging                                        | `false` |
 
 ## Setting up Keycloak
