@@ -25,7 +25,18 @@ jobs:
       - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
       script:
       - make chart-lint
-    - stage: deploy
+    - stage: Deploy
+      if: branch = master AND type != pull_request
+      services:
+        - docker
+      before_script:
+      - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      script:
+      - docker build -t gabibbo97/helm-chart-mongodb-assistant:$(cat charts/mongodb/Chart.yaml | cut -d ':' -f 2 | tr -d '\n\t ')
+      after_success:
+      - docker push gabibbo97/helm-chart-mongodb-assistant:$(cat charts/mongodb/Chart.yaml | cut -d ':' -f 2 | tr -d '\n\t ') gabibbo97/helm-chart-mongodb-assistant:$(cat charts/mongodb/Chart.yaml | cut -d ':' -f 2 | tr -d '\n\t ')
+      - docker push gabibbo97/helm-chart-mongodb-assistant:$(cat charts/mongodb/Chart.yaml | cut -d ':' -f 2 | tr -d '\n\t ') gabibbo97/helm-chart-mongodb-assistant:latest
+    - stage: Deploy
       if: branch = master AND type != pull_request
       cache:
         directories:

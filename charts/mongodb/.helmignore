@@ -21,4 +21,4 @@
 *.tmproj
 .vscode/
 # Dockerfile
-Docker/
+Dockerfile
