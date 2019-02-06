@@ -7,11 +7,17 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ include "mongodb.fullname" . }}-tls-ca-creator
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ include "mongodb.fullname" . }}-secret-writer
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -21,6 +27,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "mongodb.fullname" . }}-tls-ca-creator
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
 roleRef:
   apiVersion: rbac.authorization.k8s.io
   kind: Role
@@ -34,7 +43,8 @@ kind: Job
 metadata:
   name: {{ include "mongodb.fullname" . }}-create-tls-ca
   annotations:
-    helm.sh/hook: post-install
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: '10'
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
 spec:
   template:
