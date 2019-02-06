@@ -15,6 +15,8 @@ helm install gabibbo97/mongodb
 | Parameter                             | Description                                                  | Default  |
 | ------------------------------------- | ------------------------------------------------------------ | :------: |
 | `isolateClusterWithNetworkPolicy`     | Isolate the cluster from the other services                  |  `true`  |
+| `persistentVolumeClaims.enabled`      | Should the chart use persistentVolumeClaims                  | `false`  |
+| `persistentVolumeClaims.size`         | Minimum size of a persistent volume                          |  `2Gi`   |
 | `podDisruptionPolicies.configServers` | How many config servers should be kept available             |   `2`    |
 | `podDisruptionPolicies.routers`       | How many routers should be kept available                    |   `1`    |
 | `podDisruptionPolicies.shardServers`  | How many shard servers should be kept available              |   `2`    |
