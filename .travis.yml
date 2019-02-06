@@ -25,7 +25,17 @@ jobs:
       - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
       script:
       - make chart-lint
-    - stage: deploy
+    - stage: Deploy
+      if: branch = master AND type != pull_request
+      services:
+        - docker
+      before_script:
+      - make docker-login
+      script:
+      - make docker-build-image
+      after_success:
+      - make docker-push
+    - stage: Deploy
       if: branch = master AND type != pull_request
       cache:
         directories:
