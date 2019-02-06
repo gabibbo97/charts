@@ -3,49 +3,14 @@
 # CA SECRET CREATION #
 ######################
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: {{ include "mongodb.fullname" . }}-tls-ca-creator
-  annotations:
-    helm.sh/hook: pre-install
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: {{ include "mongodb.fullname" . }}-secret-writer
-  annotations:
-    helm.sh/hook: pre-install
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
-rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs:     ["create"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ include "mongodb.fullname" . }}-tls-ca-creator
-  annotations:
-    helm.sh/hook: pre-install
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
-roleRef:
-  apiVersion: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ include "mongodb.fullname" . }}-secret-writer
-subjects:
-- kind: ServiceAccount
-  name: {{ include "mongodb.fullname" . }}-tls-ca-creator
----
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "mongodb.fullname" . }}-create-tls-ca
   annotations:
-    helm.sh/hook: pre-install
-    helm.sh/hook-weight: '10'
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeded
+    "helm.sh/hook": "pre-install"
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeded"
 spec:
   template:
     metadata:
@@ -60,7 +25,7 @@ spec:
         - name: scripts
           configMap:
             defaultMode: 0755
-            name: {{ include "mongodb.fullname" . }}-scripts
+            name: {{ include "mongodb.fullname" . }}-tls-ca-create-scripts
             optional: false
       initContainers:
         - name: generate-tls

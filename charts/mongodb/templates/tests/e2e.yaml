@@ -4,7 +4,7 @@ Kind: Pod
 metadata:
   name: mongodb-e2e
   annotations:
-    helm.sh/hook: test-success
+    "helm.sh/hook": "test-success"
 spec:
   containers:
     - name: ping-test

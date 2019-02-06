@@ -1,0 +1,40 @@
+{{- if eq "script" .Values.tls.ca.managementMode }}
+######################
+# CA SECRET DELETION #
+######################
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mongodb.fullname" . }}-delete-tls-ca
+  annotations:
+    "helm.sh/hook": "post-delete"
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeded"
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: tls-ca-deleter
+    spec:
+      serviceAccountName: {{ include "mongodb.fullname" . }}-tls-ca-deleter
+      restartPolicy: Never
+      volumes:
+      - name: scripts
+        configMap:
+          defaultMode: 0755
+          name: {{ include "mongodb.fullname" . }}-tls-ca-delete-scripts
+          optional: false
+      containers:
+        - name: delete-tls
+          image: {{ printf "%s:%s" .Values.images.tls.repository .Values.images.tls.tag }}
+          imagePullPolicy: {{ .Values.images.tls.pullPolicy }}
+          command: [ '/opt/mongoscripts/upload-cert.sh' ]
+          args:    [ 'delete' ]
+          env:
+            - name: SECRET_NAME
+              value: {{ include "mongodb.fullname" . }}-tls-ca
+          volumeMounts:
+            - name: scripts
+              mountPath: /opt/mongoscripts
+{{- end }}
