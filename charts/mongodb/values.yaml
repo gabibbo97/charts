@@ -5,7 +5,7 @@ fullnameOverride: ""
 images:
   database:
     repository: mongo
-    tag: "4.0.5"
+    tag: "4.0.6"
     pullPolicy: IfNotPresent
   tls:
     repository: debian
