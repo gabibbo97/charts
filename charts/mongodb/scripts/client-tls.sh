@@ -1,4 +1,17 @@
 #!/usr/bin/env sh
+#
+# Create a MongoDB client certificate
+#
+# ENVIRONMENT VARIABLES (mandatory)
+#   CA_CRT                  The certificate authority certificate
+#   CA_KEY                  The certificate authority key
+#   USER_NAME               Common name of the end certificate
+#   RELEASE_NAME            Sets the release name
+#
+# ENVIRONMENT VARIABLES (optional)
+#   CA_DIR                  Directory to copy the CA key to
+#   CERT_DIR                Directory to copy the client crt and key to
+#
 
 set -e
 

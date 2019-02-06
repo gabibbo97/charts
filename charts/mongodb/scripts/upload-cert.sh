@@ -1,5 +1,17 @@
 #!/usr/bin/env sh
+#
+# ARGUMENTS
+#   upload                  Upload a crt + key pair to Kubernetes
+#   delete                  Delete a crt + key pair from Kubernetes
+#
+# ENVIRONMENT VARIABLES (mandatory)
+#   SECRET_NAME             The name the secret should have
+#   CERT_CRT                The certificate location
+#   CERT_KEY                The key location
+#
+
 set -e
+
 # Install curl if not present
 if [ -x "$(command -v apk)" ] && ! [ -x "$(command -v curl)" ]; then apk add --no-cache curl; fi
 if [ -x "$(command -v apt)" ] && ! [ -x "$(command -v curl)" ]; then apt-get update && apt-get install --yes curl; fi

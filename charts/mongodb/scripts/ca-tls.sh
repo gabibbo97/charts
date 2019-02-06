@@ -1,4 +1,13 @@
 #!/usr/bin/env sh
+#
+# Create a MongoDB certificate authority
+#
+# ENVIRONMENT VARIABLES (mandatory)
+#   RELEASE_NAME            Sets the release name
+#
+# ENVIRONMENT VARIABLES (optional)
+#   CA_DIR                  Directory to copy the CA key to
+#
 
 set -e
 

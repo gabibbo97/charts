@@ -1,7 +1,14 @@
 #!/usr/bin/env sh
 #
-#   Initial replica set initialization script
+# Initialize a MongoDB Replica Set
 #
+# ENVIRONMENT VARIABLES (mandatory)
+#   SERVER_COUNT                The number of servers in the replica set
+#   SERVICE_NAME                The name of the headless service
+#   REPLICA_SET_NAME            The name of the replica set
+#   POD_NAMESPACE               Kubernetes pod namespace
+#
+
 set -e
 
 #

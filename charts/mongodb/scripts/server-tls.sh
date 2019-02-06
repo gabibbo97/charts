@@ -1,4 +1,19 @@
 #!/usr/bin/env sh
+#
+# Create a MongoDB server certificate
+#
+# ENVIRONMENT VARIABLES (mandatory)
+#   CA_CRT                  The certificate authority certificate
+#   CA_KEY                  The certificate authority key
+#   CLUSTER_NAME            Kubernetes service name
+#   POD_IP                  Kubernetes pod IP
+#   POD_NAME                Kubernetes pod name
+#   POD_NAMESPACE           Kubernetes pod namespace
+#
+# ENVIRONMENT VARIABLES (optional)
+#   CA_DIR                  Directory to copy the CA key to
+#   CERT_DIR                Directory to copy the server crt and key to
+#
 
 set -e
 
