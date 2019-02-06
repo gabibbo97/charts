@@ -83,7 +83,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: create-certs
-        image: gabibbo97/kubectl:v1.13.2-alpine
+        image: gabibbo97/kubectl:v1.13.3-alpine
         imagePullPolicy: Always
         command:
           - /bin/sh
@@ -186,7 +186,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: delete-certs
-        image: gabibbo97/kubectl:v1.13.2-alpine
+        image: gabibbo97/kubectl:v1.13.3-alpine
         imagePullPolicy: Always
         command:
           - /bin/sh

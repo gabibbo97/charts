@@ -4,7 +4,7 @@
 
 image:
   repository: gabibbo97/kubectl
-  tag: v1.13.2-alpine
+  tag: v1.13.3-alpine
   pullPolicy: Always
 
 nameOverride: ""
