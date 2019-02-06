@@ -71,11 +71,15 @@ spec:
         - name: upload-tls
           image: {{ printf "%s:%s" .Values.images.tls.repository .Values.images.tls.tag }}
           imagePullPolicy: {{ .Values.images.tls.pullPolicy }}
-          command: [ '/opt/mongoscripts/uploadca.sh' ]
+          command: [ '/opt/mongoscripts/upload-cert.sh' ]
           args:    [ 'upload' ]
           env:
             - name: SECRET_NAME
               value: {{ include "mongodb.fullname" . }}-tls-ca
+            - name: CERT_CRT
+              value: /etc/mongodb/tls/ca.crt
+            - name: CERT_KEY
+              value: /etc/mongodb/tls/ca.key
           volumeMounts:
             - name: tls
               mountPath: /etc/mongodb/tls

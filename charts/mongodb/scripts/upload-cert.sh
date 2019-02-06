@@ -16,8 +16,8 @@ if [ "$1" = "upload" ]; then
     "namespace" : "$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)"
   },
   "data" : {
-    "tls.crt" : "$(base64 -w0 < /etc/mongodb/tls/ca.crt)",
-    "tls.key" : "$(base64 -w0 < /etc/mongodb/tls/ca.key)"
+    "tls.crt" : "$(base64 -w0 < "${CERT_CRT}")",
+    "tls.key" : "$(base64 -w0 < "${CERT_KEY}")"
   },
   "type" : "kubernetes.io/tls"
 }

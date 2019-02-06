@@ -127,3 +127,23 @@ spec:
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
+        {{- if .Release.IsInstall }}
+        - name: initialize-rs
+          image: {{ printf "%s:%s" .Values.images.database.repository .Values.images.database.tag }}
+          imagePullPolicy: {{ .Values.images.database.pullPolicy }}
+          command: ['/opt/mongoscripts/init-rs.sh']
+          env:
+            - name: REPLICA_SET_NAME
+              value: ConfigRS
+            - name: SERVICE_NAME
+              value: {{ include "mongodb.fullname" . }}-configsvr
+            - name: SERVER_COUNT
+              value: {{ .Values.topology.configServers | quote }}
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: scripts
+              mountPath: /opt/mongoscripts
+        {{- end }}
