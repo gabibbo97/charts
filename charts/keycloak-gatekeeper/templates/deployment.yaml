@@ -65,7 +65,7 @@ spec:
             {{- end }}
             {{- if .Values.rules }}
             {{- range $i, $rule := .Values.rules }}
-            - --resources="{{ $rule }}"
+            - --resources={{ $rule }}
             {{- end }}
             {{- end }}
             {{- if .Values.scopes }}
