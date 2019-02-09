@@ -11,12 +11,10 @@
 #
 
 set -e
+. /opt/mongoscripts/lib.sh
 
 # Install curl if not present
-if [ -x "$(command -v apk)" ] && ! [ -x "$(command -v curl)" ]; then apk add --no-cache curl; fi
-if [ -x "$(command -v apt)" ] && ! [ -x "$(command -v curl)" ]; then apt-get update && apt-get install --yes curl; fi
-if [ -x "$(command -v dnf)" ] && ! [ -x "$(command -v curl)" ]; then dnf install --assumeyes curl; fi
-if [ -x "$(command -v yum)" ] && ! [ -x "$(command -v curl)" ]; then yum install --assumeyes curl; fi
+installPackage 'curl'
 
 if [ "$1" = "upload" ]; then
   cat > request.json <<EOF

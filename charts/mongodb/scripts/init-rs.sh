@@ -12,15 +12,10 @@
 set -e
 
 #
-# Utils
+# Import utils
 #
-waitForever() {
-    # 'sleep infinity' is a GNU coreutils reserved function, sleep <LONGTIME> is more universal
-    # Until we get a userspace program for the pause() syscall
-    while true; do
-        sleep infinity || sleep 3600
-    done
-}
+. /opt/mongoscripts/lib.sh
+
 
 #
 # Perform initialization only on first host
@@ -33,18 +28,9 @@ else
 fi
 
 #
-# Install DIG
+# Wait until every server is alive
 #
-if [ -x "$(command -v apt)" ] && ! [ -x "$(command -v dig)" ]; then apt-get update && apt-get install --yes dnsutils; fi
-
-#
-# Perform DNS lookups to find out the server amount
-#
-DNS_LOOKUP="$(mktemp)"
-until [ "$(wc -l < "$DNS_LOOKUP")" = "${SERVER_COUNT}" ]; do
-    dig +noall +answer SRV "${SERVICE_NAME}.${POD_NAMESPACE}.svc.cluster.local" > "${DNS_LOOKUP}" 2> /dev/null
-    sleep 1
-done
+waitDNS "${SERVER_COUNT}" "${SERVICE_NAME}" "${POD_NAMESPACE}"
 
 #
 # Generate replica set document

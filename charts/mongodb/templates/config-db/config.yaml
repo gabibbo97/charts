@@ -146,4 +146,16 @@ spec:
           volumeMounts:
             - name: scripts
               mountPath: /opt/mongoscripts
+        - name: initialize-rs-user
+          image: {{ printf "%s:%s" $.Values.images.database.repository $.Values.images.database.tag }}
+          imagePullPolicy: {{ $.Values.images.database.pullPolicy }}
+          command: ['/opt/mongoscripts/init-rs-user.sh']
+          env:
+            - name: RELEASE_NAME
+              value: {{ $.Release.Name }}
+            - name: SERVICE_PORT
+              value: "27019"
+          volumeMounts:
+            - name: scripts
+              mountPath: /opt/mongoscripts
         {{- end }}

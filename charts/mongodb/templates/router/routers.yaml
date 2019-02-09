@@ -80,6 +80,28 @@ spec:
               mountPath: /etc/mongodb/tls
             - name: scripts
               mountPath: /opt/mongoscripts
+        {{- if .Release.IsInstall }}
+        - name: wait-servers
+          image: {{ printf "%s:%s" .Values.images.tls.repository .Values.images.tls.tag }}
+          imagePullPolicy: {{ .Values.images.tls.pullPolicy }}
+          command: [ '/opt/mongoscripts/router-wait.sh' ]
+          env:
+            - name: NAME_PREFIX
+              value: {{ include "mongodb.fullname" . }}
+            - name: CONFIG_SERVERS
+              value: {{ .Values.topology.configServers | quote }}
+            - name: SHARDS_COUNT
+              value: {{ .Values.topology.shards.count | quote }}
+            - name: SHARDS_SIZE
+              value: {{ .Values.topology.shards.servers | quote }}
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: scripts
+              mountPath: /opt/mongoscripts
+      {{- end }}
       containers:
         - name: router
           image: {{ printf "%s:%s" .Values.images.database.repository .Values.images.database.tag }}

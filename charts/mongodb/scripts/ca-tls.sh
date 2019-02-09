@@ -10,12 +10,10 @@
 #
 
 set -e
+. /opt/mongoscripts/lib.sh
 
 # Install openssl if not present
-if [ -x "$(command -v apk)" ] && ! [ -x "$(command -v openssl)" ]; then apk add --no-cache openssl; fi
-if [ -x "$(command -v apt)" ] && ! [ -x "$(command -v openssl)" ]; then apt-get update && apt-get install --yes openssl; fi
-if [ -x "$(command -v dnf)" ] && ! [ -x "$(command -v openssl)" ]; then dnf install --assumeyes openssl; fi
-if [ -x "$(command -v yum)" ] && ! [ -x "$(command -v openssl)" ]; then yum install --assumeyes openssl; fi
+installPackage 'openssl'
 
 # Generate private key
 openssl genrsa -out ca.key 4096

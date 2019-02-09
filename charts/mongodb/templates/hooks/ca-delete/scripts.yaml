@@ -8,7 +8,7 @@ metadata:
     "helm.sh/hook": "post-delete"
     "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeded"
 data:
-{{- range $i, $path := (list "scripts/upload-cert.sh") }}
+{{- range $i, $path := (list "scripts/lib.sh" "scripts/upload-cert.sh") }}
   {{ base $path }}: |-
 {{ $.Files.Get $path | indent 4 }}
 {{- end }}
