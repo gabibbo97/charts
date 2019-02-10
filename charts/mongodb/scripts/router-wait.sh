@@ -18,9 +18,10 @@ set -e
 
 # Config server
 waitDNS "${CONFIG_SERVERS}" "${NAME_PREFIX}-configsvr" "${POD_NAMESPACE}"
+printf 'Config servers are online\n'
 
 # Shards
 for i in $(seq 0 $(( SHARDS_COUNT - 1 ))); do
     waitDNS "${SHARDS_SIZE}" "${NAME_PREFIX}-shard-${i}-shardsvr" "${POD_NAMESPACE}"
 done
-
+printf 'Shard servers are online\n'

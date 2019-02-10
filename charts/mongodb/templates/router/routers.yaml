@@ -11,7 +11,11 @@ metadata:
     app.kubernetes.io/component: router
     helm.sh/chart: {{ include "mongodb.chart" . }}
 spec:
+  {{- if .Release.IsInstall }}
+  replicas: 1
+  {{- else }}
   replicas: {{ .Values.topology.routers }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "mongodb.name" . }}
@@ -110,7 +114,7 @@ spec:
             - mongos
           args:
             - --bind_ip_all
-            - --configdb=ConfigRS/{{ include "mongodb.fullname" . }}-configsvr-0.{{ include "mongodb.fullname" . }}-configsvr.{{ .Release.Namespace }}.svc.cluster.local:27019
+            - --configdb=ConfigRS/{{ range $i, $e := until (int .Values.topology.configServers) -}}{{- if ne $i 0 }},{{- end -}}{{ include "mongodb.fullname" $ }}-configsvr-{{ $i }}.{{ include "mongodb.fullname" $ }}-configsvr.{{ $.Release.Namespace }}.svc.cluster.local:27019{{- end }}
             - --sslMode=preferSSL
             - --sslPEMKeyFile=/etc/mongodb/tls/server.pem
             - --sslCAFile=/etc/mongodb/ca/tls.crt
@@ -128,3 +132,15 @@ spec:
             runAsUser: 1000
             runAsGroup: 1000
             readOnlyRootFilesystem: false
+        {{- if .Release.IsInstall }}
+        - name: initialize-shard-user
+          image: {{ printf "%s:%s" .Values.images.database.repository .Values.images.database.tag }}
+          imagePullPolicy: {{ .Values.images.database.pullPolicy }}
+          command: ['/opt/mongoscripts/init-shard-user.sh']
+          env:
+            - name: RELEASE_NAME
+              value: {{ .Release.Name }}
+          volumeMounts:
+            - name: scripts
+              mountPath: /opt/mongoscripts
+        {{- end }}

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #
-# Initialize a MongoDB Shard user
+# Initialize a MongoDB Replica Set user
 #
 # ENVIRONMENT VARIABLES (mandatory)
 #   RELEASE_NAME                The release name
@@ -20,7 +20,7 @@ set -e
 until mongo --port "${SERVICE_PORT}" --eval 'db.adminCommand({ ping:1 })' | grep 'ok' | grep -q '1'; do
     sleep 1
 done
-printf 'Router is alive\n'
+printf 'Server is alive\n'
 
 #
 # Wait until the replica set is initialized
@@ -54,7 +54,7 @@ while true; do
 
     USER_COMMAND="db.getSiblingDB(\"\$external\").runCommand("
     USER_COMMAND="${USER_COMMAND}{"
-    USER_COMMAND="${USER_COMMAND}\"createUser\":\"CN=HelmClusterRootUser,OU=Users,O=MongoDB-${RELEASE_NAME}\","
+    USER_COMMAND="${USER_COMMAND}\"createUser\":\"O=MongoDB-${RELEASE_NAME},OU=Users,CN=HelmClusterRootUser\","
     USER_COMMAND="${USER_COMMAND}\"roles\":["
     USER_COMMAND="${USER_COMMAND}{\"role\":\"root\",\"db\":\"admin\"}"
     USER_COMMAND="${USER_COMMAND}],"

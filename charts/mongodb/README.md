@@ -26,22 +26,41 @@ helm install gabibbo97/mongodb
 | `topology.shards.count`               | How many shards to deploy                                    |   `3`    |
 | `topology.shards.servers`             | How many servers to deploy for each shard                    |   `3`    |
 
-## How the different parts interact
+## Cluster management 101
 
-```text
-+----------------+
-| MongoDB Client |
-+-------+--------+
-        |
-        |
-        v           Ask about shard distribution
-+-------+--------+------------------------------> +-----------------------+
-| MongoDB Router |                                | MongoDB Config Server |
-+-------+--------+ <------------------------------+-----------------------+
-        |           Reply with shard configuration
-        |
-        |
-+-------v--------+
-| MongoDB Shard  |
-+----------------+
+### Accessing the cluster
+
+To access the cluster please ensure that you have valid credentials
+
+This guide assumes that
+
+- `ca.crt` is the cluster certificate authority
+- `client.pem` is the concatenation of the client key and certificate
+
+#### Containerized
+
+Forward the cluster to localhost using `kubectl port-forward`
+
+##### Docker / Podman
+
+You can use either `docker` or `podman`, the syntax is the same
+
+```bash
+sudo podman run \
+        --rm --it --net host \
+        --volume "$(pwd):/creds" \
+        --entrypoint 'mongo' \
+        mongo \
+                --ssl --sslCAFile /creds/ca.crt --sslPEMKeyFile /creds/client.pem \
+                --authenticationDatabase '$external' --authenticationMechanism 'MONGODB-X509' \
+                --host 'localhost'
+```
+
+##### From cluster
+
+```bash
+kubectl run --rm -it --restart=Never --image=mongo mongopod -- \
+        mongo --ssl --sslCAFile /creds/ca.crt --sslPEMKeyFile /creds/client.pem \
+                --authenticationDatabase '$external' --authenticationMechanism 'MONGODB-X509' \
+                mongodb+srv://mongodb-router.default.svc.cluster.local
 ```
