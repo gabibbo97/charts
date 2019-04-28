@@ -17,7 +17,6 @@ helm repo update
 
 ### Charts
 
-* [dex](charts/dex/README.md)
 * [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
 * [kuberos](charts/kuberos/README.md)
 * [periodic-daemonset](charts/periodic-daemonset/README.md)
