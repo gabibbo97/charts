@@ -19,7 +19,6 @@ helm repo update
 
 * [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
 * [kuberos](charts/kuberos/README.md)
-* [periodic-daemonset](charts/periodic-daemonset/README.md)
 
 ### Scripts
 
