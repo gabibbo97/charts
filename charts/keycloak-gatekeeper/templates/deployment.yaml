@@ -41,10 +41,10 @@ spec:
             - --client-secret=$(CLIENT_SECRET)
             - --upstream-url={{ .Values.upstreamURL }}
             - --skip-upstream-tls-verify={{ .Values.skipUpstreamTlsVerify }}
-            - --enable-default-deny
-            - --enable-logging
-            - --enable-refresh-tokens
-            - --enable-session-cookies
+            - --enable-default-deny={{ .Values.defaultDeny }}
+            - --enable-logging={{ .Values.logging }}
+            - --enable-refresh-tokens={{ .Values.refreshTokens }}
+            - --enable-session-cookies={{ .Values.sessionCookies }}
             {{- if not .Values.ingress.tls }}
             - --secure-cookie=false
             {{- end }}
@@ -75,6 +75,12 @@ spec:
             {{- end }}
             {{- if .Values.prometheusMetrics }}
             - --enable-metrics
+            {{- end }}
+            {{- if .Values.droolsPolicyEnabled }}
+            - -Dkeycloak.profile.feature.authz_drools_policy=enabled
+            {{- end }}
+            {{- range $i, $arg := .Values.extraArgs }}
+            - --{{ $arg }}
             {{- end }}
           envFrom:
             - secretRef:
