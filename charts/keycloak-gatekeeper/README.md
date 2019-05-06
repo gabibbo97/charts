@@ -24,18 +24,25 @@ This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 
 ## Configuration options
 
-| Parameter      | Description                                                | Default |
-| -------------- | ---------------------------------------------------------- | :-----: |
-| `discoveryURL` | URL for OpenID autoconfiguration                           | ``      |
-| `upstreamURL`  | URL of the service to proxy                                | ``      |
-| `skipUpstreamTlsVerify`  | URL of the service to proxy                      | ``      |
-| `ClientID`     | Client ID for OpenID server                                | ``      |
-| `ClientSecret` | Client secret for OpenID server                            | ``      |
-| `scopes`       | Additional required scopes for authentication              | `[]`    |
-| `addClaims`    | Set these claims as headers in the request for the backend | `[]`    |
-| `matchClaims`  | Key-Value pairs that the JWT should contain                | `{}`    |
-| `rules`        | Specify fine grained rules for authentication              | `[]`    |
-| `debug`        | Use verbose logging                                        | `false` |
+| Parameter        | Description                                                | Default |
+| ---------------- | ---------------------------------------------------------- | :-----: |
+| `discoveryURL`   | URL for OpenID autoconfiguration                           | ``      |
+| `upstreamURL`    | URL of the service to proxy                                | ``      |
+| `skipUpstreamTlsVerify` | URL of the service to proxy                         | ``      |
+| `ClientID`       | Client ID for OpenID server                                | ``      |
+| `ClientSecret`   | Client secret for OpenID server                            | ``      |
+| `scopes`         | Additional required scopes for authentication              | `[]`    |
+| `addClaims`      | Set these claims as headers in the request for the backend | `[]`    |
+| `matchClaims`    | Key-Value pairs that the JWT should contain                | `{}`    |
+| `rules`          | Specify fine grained rules for authentication              | `[]`    |
+| `defaultDeny`    | Enable a default denial on all requests                    | `true`  |
+| `logging`        | Enable http logging of the requests                        | `true`  |
+| `refreshTokens`  | Enables the handling of the refresh tokens                 | `true`  |
+| `sessionCookies` | Set access and refresh tokens to be session only           | `true`  |
+| `droolsPolicyEnabled` | Enable support for Drools Policies (tech preview)     | `true`  |
+| `debug`          | Use verbose logging                                        | `false` |
+| `extraArgs`      | Additional command line arguments (as `option=value`)      | `[]`    |
+
 
 ## Setting up Keycloak
 
@@ -55,19 +62,19 @@ Each element of `resource` is a `|` (pipe separator) delimited list of key, valu
 
 Here is a non exhaustive list of key-value pairs
 
-| Example          | Description                                                        |
-| :--------------: | ------------------------------------------------------------------ |
-| uri=/private/*   | require access to subpaths of /private                             |
-| roles=admin,user | require the user to have both roles to access                      |
-| require-any-role | combined with roles above, switches the conditional from AND to OR |
-| white-listed     | allow anyone to have access                                        |
-| methods=GET,POST | apply authentication to these methods                              |
+| Example               | Description                                                        |
+| :-------------------: | ------------------------------------------------------------------ |
+| uri=/private/*        | require access to subpaths of /private                             |
+| roles=admin,user      | require the user to have both roles to access                      |
+| require-any-role=true | combined with roles above, switches the conditional from AND to OR |
+| white-listed=true     | allow anyone to have access                                        |
+| methods=GET,POST      | apply authentication to these methods                              |
 
 ## Example
 
 ```yaml
 resources:
-- "uri=/admin*|roles=admin,root|require-any-role"
+- "uri=/admin*|roles=admin,root|require-any-role=true"
 - "uri=/public*|white-listed=true"
 - "uri=/authenticated/users|roles=user"
 ```
