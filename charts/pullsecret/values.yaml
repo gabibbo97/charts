@@ -1,0 +1,11 @@
+# The secret name
+secretName: ""
+
+# Registry URL
+registryURL: "https://index.docker.io/v1/"
+
+# Registry credentials
+registryUsername: ""
+registryPassword: ""
+# Registry email (optional)
+registryEmail: ""
