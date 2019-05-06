@@ -84,3 +84,32 @@ This sets up
 * Paths under `/admin` to be accessible only from admins or root
 * Paths under `/public` to be accessible by anyone
 * Path `/authenticated/users` is accessible only from users
+
+## Troubleshooting
+
+### Resolving "JWT claims invalid: invalid claims, cannot find 'client_id' in 'aud' claim"
+
+In the Keycloak admin console:
+
+- Realm -> Client Scopes -> "roles" -> edit
+- Mappers -> Create -> Script Mapper
+- Protocol OIDC, Name: `aud-bug-workaround-script`
+
+Add the following script:
+
+```javascript
+// add current client-id to token audience
+token.addAudience(token.getIssuedFor());
+
+// return token issuer as dummy result assigned to iss again
+token.getIssuer();
+```
+
+Token Claim Name: iss
+Add to ID Token: on
+Add to access token: on
+Add to userinfo: off
+
+Note that you might need to add `-Dkeycloak.profile.feature.scripts=enabled` to Keycloak options
+
+See [the upstream bug tracker for more details about this workaround](https://issues.jboss.org/browse/KEYCLOAK-8954)
