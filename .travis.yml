@@ -1,15 +1,9 @@
 language: minimal
 
-# Install make
-addons:
-  apt:
-    packages:
-      - shellcheck
-
 # Do not build gh-pages
 branches:
   except:
-  - gh-pages
+    - gh-pages
 
 jobs:
   include:
@@ -17,23 +11,27 @@ jobs:
       addons:
         apt:
           packages:
-          - shellcheck
+            - shellcheck
       script:
-      - make scripts-lint
+        - find . -type f -name '*.sh' -exec shellcheck -x {} \;
     - stage: Lint
       before_script:
-      - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+        - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
       script:
-      - make chart-lint
+        - find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm lint {} \;
     - stage: Deploy
       if: branch = master AND type != pull_request
       cache:
         directories:
           - repo
       before_script:
-      - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+        - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
       script:
-      - make chart-package
+        - mkdir -p repo
+        - helm init --client-only
+        - find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm dependency build {} \;
+        - find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm package --destination repo {} \;
+        - helm repo index --merge repo/index.yaml repo
       deploy:
         local-dir: repo
         provider: pages
