@@ -35,8 +35,8 @@ jobs:
         - |-
           if git clone -b gh-pages https://github.com/gabibbo97/charts.git old-repo
           then
-            mv -rfv old-repo/index.yaml repo
-            mv -rfv old-repo/*.tgz repo
+            mv old-repo/index.yaml repo
+            mv old-repo/*.tgz repo
           fi
       script:
         - find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm dependency build {} \;
