@@ -20,15 +20,25 @@ jobs:
       script:
         - find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm lint {} \;
     - stage: Deploy
+      addons:
+        apt:
+          packages:
+            - git
       if: branch = master AND type != pull_request
       cache:
         directories:
           - repo
       before_script:
         - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
-      script:
-        - mkdir -p repo
         - helm init --client-only
+        - mkdir -p repo
+        - |-
+          if git clone -b gh-pages https://github.com/gabibbo97/charts.git old-repo
+          then
+            mv -rfv old-repo/index.yaml repo
+            mv -rfv old-repo/*.tgz repo
+          fi
+      script:
         - find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm dependency build {} \;
         - find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm package --destination repo {} \;
         - helm repo index --merge repo/index.yaml repo
