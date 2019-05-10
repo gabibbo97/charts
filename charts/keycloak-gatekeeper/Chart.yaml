@@ -9,7 +9,7 @@ keywords:
   - authorization
   - keycloak
   - proxy
-version: 1.2.0
+version: 1.2.1
 engine: gotpl
 maintainers:
   - name: gabibbo97
