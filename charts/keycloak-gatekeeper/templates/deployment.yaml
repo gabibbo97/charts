@@ -20,14 +20,17 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "keycloak-gatekeeper.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/configuration-checksum: {{ toJson .Values | sha256sum | trunc 48 | quote }}
         app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-      {{- if .Values.prometheusMetrics }}
       annotations:
+        checksum/config: {{ toJson .Values | sha256sum | trunc 48 | quote }}
+      {{- if .Values.prometheusMetrics }}
         prometheus.io/scrape: "true"
         prometheus.io/path: "/oauth/metrics"
         prometheus.io/port: "3000"
       {{- end }}
+{{- with .Values.podAnnotations }}
+{{ toYaml . | indent 8 }}
+{{- end }}
     spec:
       serviceAccountName: {{ include "keycloak-gatekeeper.serviceAccountName" . }}
       containers:
