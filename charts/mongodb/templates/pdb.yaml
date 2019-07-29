@@ -1,0 +1,23 @@
+{{- if .Values.pdb.enabled }}
+{{- range $i, $role := list "arbiter" "data" }}
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "mongodb.fullname" $ }}-{{ $role }}
+  labels:
+{{ include "mongodb.labels" $ | indent 4 }}
+    app.kubernetes.io/component: {{ $role }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "mongodb.name" $ }}
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/component: {{ $role }}
+  {{- if eq "arbiter" $role }}
+  minAvailable: {{ $.Values.pdb.minArbiters }}
+  {{- else if eq "data" $role }}
+  minAvailable: {{ $.Values.pdb.minDataServers }}
+  {{- end }}
+{{- end }}
+{{- end }}

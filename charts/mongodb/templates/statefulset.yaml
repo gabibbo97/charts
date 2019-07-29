@@ -1,0 +1,103 @@
+{{- range $i, $role := list "arbiter" "data" }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mongodb.fullname" $ }}-{{ $role }}
+  labels:
+{{ include "mongodb.labels" $ | indent 4 }}
+    app.kubernetes.io/component: {{ $role }}
+spec:
+  {{- if eq "arbiter" $role }}
+  replicas: {{ $.Values.replicaSetTopology.arbiters }}
+  {{- else }}
+  replicas: {{ $.Values.replicaSetTopology.data }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "mongodb.name" $ }}
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/component: {{ $role }}
+  serviceName: {{ include "mongodb.fullname" $ }}-{{ $role }}
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  {{- if and (eq "data" $role) $.Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ['ReadWriteOnce']
+        {{- if $.Values.persistence.storageClassName }}
+        storageClassName: {{ $.Values.persistence.storageClassName }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ $.Values.persistence.size }}
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "mongodb.name" $ }}
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/component: {{ $role }}
+    spec:
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: certs
+          emptyDir:
+            medium: Memory
+            sizeLimit: 4Mi
+        {{- if or (eq "arbiter" $role) (not $.Values.persistence.enabled) }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+      containers:
+        - name: database
+          image: "{{ $.Values.images.database.repository }}:{{ $.Values.images.database.tag }}"
+          imagePullPolicy: {{ $.Values.images.database.pullPolicy }}
+          command:
+            - mongod
+          args:
+            - --bind_ip_all
+            - --dbpath=/var/lib/mongodb
+            - --replSet={{ $.Values.replicaSetName }}
+          {{- if eq "config" $.Values.mode }}
+            - --configsvr
+          {{- else if eq "shard" $.Values.mode }}
+            - --shardsvr
+          {{- end }}
+          {{- range $i, $arg := $.Values.extraArgs }}
+            - {{ $arg }}
+          {{ end -}}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - mongo
+                  - --port={{ include "mongodb.port" $ }}
+                  - --eval
+                  - db.shutdownServer({ timeoutSecs:60 })
+          livenessProbe:
+            exec:
+              command:
+                - mongo
+                - --port={{ include "mongodb.port" $ }}
+                - --eval
+                - db.adminCommand({ ping:1 })
+          readinessProbe:
+            exec:
+              command:
+                - mongo
+                - --port={{ include "mongodb.port" $ }}
+                - --eval
+                - db.adminCommand({ ping:1 })
+          volumeMounts:
+            - name: certs
+              mountPath: /etc/mongodb/certs
+            - name: data
+              mountPath: /var/lib/mongodb
+          ports:
+            - name: mongodb
+              containerPort: {{ include "mongodb.port" $ }}
+{{- end }}

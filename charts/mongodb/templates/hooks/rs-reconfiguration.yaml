@@ -1,0 +1,68 @@
+{{- if .Values.enabledJobs.rsConfiguration }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "mongodb.fullname" . }}-configure-rs
+  labels:
+{{ include "mongodb.labels" . | indent 4 }}
+    app.kubernetes.io/component: hooks
+  annotations:
+    helm.sh/hook: post-install,post-upgrade,post-rollback
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook-weigth: "-1"
+data:
+  helm-values.js: {{ include "mongodb.helmdata.js" . | b64enc | quote }}
+  wait-alive.js: {{ .Files.Get "scripts/wait-alive.js" | b64enc | quote }}
+  reconfigure-rs.js: {{ .Files.Get "scripts/reconfigure-rs.js" | b64enc | quote }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mongodb.fullname" . }}-configure-rs
+  labels:
+{{ include "mongodb.labels" . | indent 4 }}
+    app.kubernetes.io/component: hooks
+  annotations:
+    helm.sh/hook: post-install,post-upgrade,post-rollback
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook-weigth: "0"
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "mongodb.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: hooks
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: scripts
+          secret:
+            defaultMode: 0755
+            secretName: {{ include "mongodb.fullname" . }}-configure-rs
+      initContainers:
+        - name: wait-alive
+          image: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
+          imagePullPolicy: {{ .Values.images.database.pullPolicy }}
+          command:
+            - mongo
+          args:
+            - --nodb
+            - /opt/mongo-scripts/wait-alive.js
+          volumeMounts:
+            - name: scripts
+              mountPath: /opt/mongo-scripts
+      containers:
+        - name: configure-rs
+          image: "{{ .Values.images.database.repository }}:{{ .Values.images.database.tag }}"
+          imagePullPolicy: {{ .Values.images.database.pullPolicy }}
+          command:
+            - mongo
+          args:
+            - mongodb://{{ range $i, $e := until (int .Values.replicaSetTopology.data) }}{{ if ne $i 0 }},{{ end }}{{ include "mongodb.fullname" $ }}-data-{{ $i }}.{{ include "mongodb.fullname" $ }}-data.{{ $.Release.Namespace }}.svc.cluster.local:{{ include "mongodb.port" $ }}{{ end }}
+            - /opt/mongo-scripts/reconfigure-rs.js
+          volumeMounts:
+            - name: scripts
+              mountPath: /opt/mongo-scripts
+{{- end }}

@@ -1,0 +1,46 @@
+nameOverride: ""
+fullnameOverride: ""
+
+images:
+  database:
+    repository: mongo
+    tag: 4.0.10
+    pullPolicy: IfNotPresent
+
+# The replica set mode
+#
+# standalone  Standalone replica set
+# config      Config replica set
+# shard       Shard replica set
+#
+mode: standalone
+
+# Replica set configuration
+replicaSetName: rs0
+replicaSetTopology:
+  arbiters: 1
+  data: 2
+
+# Extra arguments to pass to the mongod process
+extraArgs:
+  - --timeStampFormat=iso8601-utc
+  - --serviceExecutor=adaptive
+  - --storageEngine=wiredTiger
+  - --directoryperdb
+
+# Persistence
+persistence:
+  enabled: true
+  size: 2Gi
+  storageClassName: ""
+
+# PodDisruptionBudget
+pdb:
+  enabled: true
+  # Default configuration will allow the disruption of a single member
+  minArbiters: 1
+  minDataServers: 1
+
+# Disable jobs
+enabledJobs:
+  rsConfiguration: true
