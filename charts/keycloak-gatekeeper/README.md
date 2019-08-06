@@ -26,6 +26,9 @@ This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 
 | Parameter        | Description                                                | Default |
 | ---------------- | ---------------------------------------------------------- | :-----: |
+| `image.repository` | docker image repo                                        | keycloak/keycloak-gatekeeper |
+| `image.tag`      | docker image tag                                           | 6.0.1 |
+| `image.pullPolicy` | docker image pull policy                                 | IfNotPresent |
 | `discoveryURL`   | URL for OpenID autoconfiguration                           | ``      |
 | `upstreamURL`    | URL of the service to proxy                                | ``      |
 | `skipUpstreamTlsVerify` | URL of the service to proxy                         | ``      |
@@ -39,7 +42,7 @@ This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 | `logging`        | Enable http logging of the requests                        | `true`  |
 | `refreshTokens`  | Enables the handling of the refresh tokens                 | `true`  |
 | `sessionCookies` | Set access and refresh tokens to be session only           | `true`  |
-| `droolsPolicyEnabled` | Enable support for Drools Policies (tech preview)     | `true`  |
+| `droolsPolicyEnabled` | Enable support for Drools Policies (tech preview)     | `false` |
 | `debug`          | Use verbose logging                                        | `false` |
 | `extraArgs`      | Additional command line arguments (as `option=value`)      | `[]`    |
 | `podAnnotations` | Additional annotations to add to the pod template          | ``      |

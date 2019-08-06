@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: keycloak/keycloak-gatekeeper
-  tag: 4.8.0.Final
+  tag: 6.0.1
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -72,7 +72,7 @@ sessionCookies: true
 
 # Drools policy support was enabled by default in 4.0 to 4.7,
 # but in 4.8 was disabled and marked technology preview
-droolsPolicyEnabled: true
+droolsPolicyEnabled: false
 
 # OpenID ClientID and secret
 ClientID: ""
