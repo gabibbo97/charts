@@ -58,11 +58,14 @@ After having installed Keycloak from its [Helm chart](https://github.com/helm/ch
   * Get the `ClientID` and `ClientSecret` from the `Credentials` 
 * Goto to the "Client Scopes" menu
   * Add a new client scope and enter its settings afterwards
-  * enter Mappers tab and create new protocol with mapper type  audience 
+  * enter Mappers tab and create new protocol with mapper type  `audience`
     * select your client in "Included Client Audience"
-    * set "Add to access token" to "On" 
+    * set "Add to access token" to "On"
+* Add a new user
+  * Set a password in the "Credentilas" tab
+* In "Roles" menu add a new role "user" and add the created user to the role
 
-You can now use this new client from keycloak-gatekeeper
+You can now use this new client from keycloak-gatekeeper and login with your created user and password
 
 ## Fine grained rules for authentication
 
