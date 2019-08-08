@@ -123,3 +123,11 @@ Add to userinfo: off
 Note that you might need to add `-Dkeycloak.profile.feature.scripts=enabled` to Keycloak options
 
 See [the upstream bug tracker for more details about this workaround](https://issues.jboss.org/browse/KEYCLOAK-8954)
+
+### Getting a 403 after successful login
+
+Keyclaok Gatekeeper log will say something like:
+
+```unable to verify the id token {"error": "oidc: JWT claims invalid: invalid claims, 'aud' claim and 'client_id' do not match, aud=account, client_id=your-client"}```
+
+Add the client scope as mentioned above in Keycloak setup section
