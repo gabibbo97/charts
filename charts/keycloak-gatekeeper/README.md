@@ -54,8 +54,13 @@ See also the configuration variables used in [ingress.yaml](templates/ingress.ya
 After having installed Keycloak from its [Helm chart](https://github.com/helm/charts/tree/master/stable/keycloak)
 
 * Create a client in Keycloak with protocol `openid-connect` and access-type: `confidential`
-* Add a redirect URL to `<SCHEME>://<PROXY_HOST>/oauth/callback`
-* Get the `ClientID` and `ClientSecret` from the `Credentials` page
+  * Add a redirect URL to `<SCHEME>://<PROXY_HOST>/oauth/callback`
+  * Get the `ClientID` and `ClientSecret` from the `Credentials` 
+* Goto to the "Client Scopes" menu
+  * Add a new client scope and enter its settings afterwards
+  * enter Mappers tab and create new protocol with mapper type  audience 
+    * select your client in "Included Client Audience"
+    * set "Add to access token" to "On" 
 
 You can now use this new client from keycloak-gatekeeper
 
