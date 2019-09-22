@@ -18,5 +18,4 @@ helm repo update
 ### Charts
 
 * [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
-* [kuberos](charts/kuberos/README.md)
 * [pullsecret](charts/pullsecret/README.md)
