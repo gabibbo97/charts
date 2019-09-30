@@ -58,6 +58,9 @@ upstreamURL: ""
 # skip upstream url tls verification
 skipUpstreamTlsVerify: false
 
+# skip OpenID provider url tls verification
+skipOpenidProviderTlsVerify: false
+
 # enable a default denial on all requests, you have to explicitly say what is permitted (recommended)
 defaultDeny: true
 
