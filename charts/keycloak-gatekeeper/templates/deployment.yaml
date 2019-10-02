@@ -34,6 +34,7 @@ spec:
             - --client-secret=$(CLIENT_SECRET)
             - --upstream-url={{ .Values.upstreamURL }}
             - --skip-upstream-tls-verify={{ .Values.skipUpstreamTlsVerify }}
+            - --skip-openid-provider-tls-verify={{ .Values.skipOpenidProviderTlsVerify }}
             - --enable-default-deny={{ .Values.defaultDeny }}
             - --enable-logging={{ .Values.logging }}
             - --enable-refresh-tokens={{ .Values.refreshTokens }}

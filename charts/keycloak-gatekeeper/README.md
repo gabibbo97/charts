@@ -32,6 +32,7 @@ This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 | `discoveryURL`   | URL for OpenID autoconfiguration                           | ``      |
 | `upstreamURL`    | URL of the service to proxy                                | ``      |
 | `skipUpstreamTlsVerify` | URL of the service to proxy                         | ``      |
+| `skipOpenidProviderTlsVerify` | skip OpenID provider url tls verification     | `false` |
 | `ClientID`       | Client ID for OpenID server                                | ``      |
 | `ClientSecret`   | Client secret for OpenID server                            | ``      |
 | `scopes`         | Additional required scopes for authentication              | `[]`    |
