@@ -77,6 +77,10 @@ sessionCookies: true
 # but in 4.8 was disabled and marked technology preview
 droolsPolicyEnabled: false
 
+secret:
+  # Specifies whether the secret resource should be created
+  create: true
+
 # OpenID ClientID and secret
 ClientID: ""
 ClientSecret: ""
