@@ -130,7 +130,7 @@ See [the upstream bug tracker for more details about this workaround](https://is
 
 ### Getting a 403 after successful login
 
-Keyclaok Gatekeeper log will say something like:
+Keycloak Gatekeeper log will say something like:
 
 ```unable to verify the id token {"error": "oidc: JWT claims invalid: invalid claims, 'aud' claim and 'client_id' do not match, aud=account, client_id=your-client"}```
 
