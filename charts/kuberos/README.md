@@ -2,6 +2,10 @@
 
 [kuberos](https://github.com/negz/kuberos) is an OIDC authentication helper for Kubernetes
 
+## A word of warning
+
+kuberos has been deprecated by its owner, consider using Heptio's Gangway instead
+
 ## TL;DR
 
 ```bash

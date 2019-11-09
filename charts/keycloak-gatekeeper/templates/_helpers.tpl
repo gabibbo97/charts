@@ -41,3 +41,23 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Chart common labels
+*/}}
+{{- define "keycloak-gatekeeper.labels" -}}
+helm.sh/chart: {{ include "keycloak-gatekeeper.chart" . }}
+app.kubernetes.io/name: {{ include "keycloak-gatekeeper.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end -}}
+
+{{/*
+Chart common selectors
+*/}}
+{{- define "keycloak-gatekeeper.selector" -}}
+helm.sh/chart: {{ include "keycloak-gatekeeper.chart" . }}
+app.kubernetes.io/name: {{ include "keycloak-gatekeeper.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}

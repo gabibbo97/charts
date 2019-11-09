@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: keycloak/keycloak-gatekeeper
-  tag: 6.0.1
+  tag: 7.0.0
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -58,6 +58,9 @@ upstreamURL: ""
 # skip upstream url tls verification
 skipUpstreamTlsVerify: false
 
+# skip OpenID provider url tls verification
+skipOpenidProviderTlsVerify: false
+
 # enable a default denial on all requests, you have to explicitly say what is permitted (recommended)
 defaultDeny: true
 
@@ -73,6 +76,10 @@ sessionCookies: true
 # Drools policy support was enabled by default in 4.0 to 4.7,
 # but in 4.8 was disabled and marked technology preview
 droolsPolicyEnabled: false
+
+secret:
+  # Specifies whether the secret resource should be created
+  create: true
 
 # OpenID ClientID and secret
 ClientID: ""
