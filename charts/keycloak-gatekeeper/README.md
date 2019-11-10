@@ -55,10 +55,18 @@ See also the configuration variables used in [ingress.yaml](templates/ingress.ya
 After having installed Keycloak from its [Helm chart](https://github.com/helm/charts/tree/master/stable/keycloak)
 
 * Create a client in Keycloak with protocol `openid-connect` and access-type: `confidential`
-* Add a redirect URL to `<SCHEME>://<PROXY_HOST>/oauth/callback`
-* Get the `ClientID` and `ClientSecret` from the `Credentials` page
+  * Add a redirect URL to `<SCHEME>://<PROXY_HOST>/oauth/callback`
+  * Get the `ClientID` and `ClientSecret` from the `Credentials` 
+* Goto to the "Client Scopes" menu
+  * Add a new client scope and enter its settings afterwards
+  * enter Mappers tab and create new protocol with mapper type  `audience`
+    * select your client in "Included Client Audience"
+    * set "Add to access token" to "On"
+* Add a new user
+  * Set a password in the "Credentilas" tab
+* In "Roles" menu add a new role "user" and add the created user to the role
 
-You can now use this new client from keycloak-gatekeeper
+You can now use this new client from keycloak-gatekeeper and login with your created user and password
 
 ## Fine grained rules for authentication
 
@@ -119,3 +127,11 @@ Add to userinfo: off
 Note that you might need to add `-Dkeycloak.profile.feature.scripts=enabled` to Keycloak options
 
 See [the upstream bug tracker for more details about this workaround](https://issues.jboss.org/browse/KEYCLOAK-8954)
+
+### Getting a 403 after successful login
+
+Keycloak Gatekeeper log will say something like:
+
+```unable to verify the id token {"error": "oidc: JWT claims invalid: invalid claims, 'aud' claim and 'client_id' do not match, aud=account, client_id=your-client"}```
+
+Add the client scope as mentioned above in Keycloak setup section
