@@ -5,8 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: keycloak/keycloak-gatekeeper
-  tag: 7.0.0
+  repository: quay.io/keycloak/keycloak-gatekeeper
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -112,6 +111,22 @@ matchClaims: {}
 #   white-listed=true      allow anyone to have access
 #   methods=GET,POST       apply authentication to these methods
 rules: []
+
+# This section allows to configure request forwardining
+forwarding:
+  # Enable or disable forwarding
+  enable: false
+  # Set this to false to manually generate the secret
+  generateSecret: true
+  # Username to use to authenticate with identity provider
+  username: ''
+  # Password to use to authenticate with identity provider
+  password: ''
+  # List of base domains to forward for, an empty array means "forward any domain"
+  domains: []
+    # This will forward requests coming for domaina.example.com but also for *.domaina.example.com
+    # - domaina.example.com
+    # - domainb.example.com
 
 # Print verbose logs
 debug: false

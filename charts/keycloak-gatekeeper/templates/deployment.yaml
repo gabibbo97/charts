@@ -25,7 +25,7 @@ spec:
       serviceAccountName: {{ include "keycloak-gatekeeper.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --listen=0.0.0.0:3000
@@ -76,10 +76,23 @@ spec:
             {{- range $i, $arg := .Values.extraArgs }}
             - --{{ $arg }}
             {{- end }}
+            {{- if .Values.forwarding.enable }}
+            - --enable-forwarding=true
+            - --forwarding-username=$(FORWARD_USERNAME)
+            - --forwarding-password=$(FORWARD_PASSWORD)
+            {{- range $i, $domain := .Values.forwarding.domains }}
+            - --forwarding-domains={{ $domain }}
+            {{- end }}
+            {{- end }}
           envFrom:
             - secretRef:
                 name: {{ include "keycloak-gatekeeper.fullname" . }}
                 optional: false
+            {{- if .Values.forwarding.enable }}
+            - secretRef:
+                name: {{ include "keycloak-gatekeeper.fullname" . }}-forwarding
+                optional: false
+            {{- end }}
           ports:
             - name: http
               containerPort: 3000
