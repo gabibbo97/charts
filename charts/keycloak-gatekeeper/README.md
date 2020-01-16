@@ -119,6 +119,8 @@ DumbSVC     KeycloakGatekeeper SVCWithAuth IDP
    <-----Reply-----|
 ```
 
+Many Go microservices use the variable `HTTP_PROXY` to identify the proxy to use.
+
 ## Troubleshooting
 
 ### Resolving "JWT claims invalid: invalid claims, cannot find 'client_id' in 'aud' claim"
