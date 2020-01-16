@@ -7,18 +7,6 @@ branches:
 
 jobs:
   include:
-    - stage: Lint
-      addons:
-        apt:
-          packages:
-            - shellcheck
-      script:
-        - find . -type f -name '*.sh' -exec shellcheck -x {} \;
-    - stage: Lint
-      before_script:
-        - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
-      script:
-        - find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm lint {} \;
     - stage: Deploy
       addons:
         apt:
