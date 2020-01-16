@@ -31,14 +31,14 @@ jobs:
           find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm dependency build {} \;
           find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm package --destination repo {} \;
           helm repo index --merge repo/index.yaml repo
-      - name: GitHub Pages
-        uses: crazy-max/ghaction-github-pages@v1.2.5
+      - name: Push to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v2.9.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: ./repo
         with:
-          allow_empty_commit: false
-          build_dir: repo
-          commit_message: 'Updated Helm repo'
+          forceOrphan: true
   helm-lint:
     runs-on: ubuntu-latest
     steps:
