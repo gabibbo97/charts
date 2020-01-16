@@ -1,0 +1,47 @@
+name: Lint and publish charts
+
+on:
+  pull_request:
+    paths:
+      - charts/**/*
+  push:
+    paths:
+      - charts/**/*
+jobs:
+  helm-publish:
+    if: github.event_name == 'push' && github.ref == 'master'
+    runs-on: ubuntu-latest
+    needs: [helm-lint]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+      - name: Checkout old repo
+        uses: actions/checkout@v2.0.0
+        with:
+          ref: gh-pages
+          path: old-repo
+      - name: Prepare repo folder
+        run: |
+          mkdir -p repo
+          if [ -f "old-repo/index.yaml" ]; then mv old-repo/index.yaml repo; fi
+          find old-repo/ -name '*.tgz' -maxdepth 1 -exec mv {} repo \;
+      - name: Package charts
+        run: |
+          find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm dependency build {} \;
+          find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm package --destination repo {} \;
+      - name: GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v1.2.5
+        with:
+          allow_empty_commit: false
+          build_dir: repo
+          commit_message: 'Updated Helm repo'
+  helm-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+      - name: Lint using helm
+        run: |
+          curl -L https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz | tar -xzf - --strip-component=1 linux-amd64/helm
+          chmod +x helm
+          ./helm lint charts/*
