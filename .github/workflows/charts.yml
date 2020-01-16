@@ -26,11 +26,15 @@ jobs:
           mkdir -p repo
           if [ -f "old-repo/index.yaml" ]; then mv old-repo/index.yaml repo; fi
           find old-repo/  -maxdepth 1 -name '*.tgz' -exec mv {} repo \;
+      - name: Download Helm
+        run: |
+          curl -L https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz | tar -xzf - --strip-component=1 linux-amd64/helm
+          chmod +x helm
       - name: Package charts
         run: |
-          find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm dependency build {} \;
-          find charts/ -mindepth 1 -maxdepth 1  -type d -exec helm package --destination repo {} \;
-          helm repo index --merge repo/index.yaml repo
+          find charts/ -mindepth 1 -maxdepth 1  -type d -exec ./helm dependency build {} \;
+          find charts/ -mindepth 1 -maxdepth 1  -type d -exec ./helm package --destination repo {} \;
+          ./helm repo index --merge repo/index.yaml repo
       - name: Push to GitHub Pages
         uses: peaceiris/actions-gh-pages@v2.9.0
         env:
@@ -44,8 +48,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2.0.0
-      - name: Lint using helm
+      - name: Download Helm
         run: |
           curl -L https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz | tar -xzf - --strip-component=1 linux-amd64/helm
           chmod +x helm
+      - name: Lint using helm
+        run: |
           ./helm lint charts/*
