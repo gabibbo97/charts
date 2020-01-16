@@ -6,6 +6,7 @@ on:
       - charts/**/*
   push:
     paths:
+      - .github/workflows/charts.yml
       - charts/**/*
 jobs:
   helm-publish:
@@ -32,6 +33,8 @@ jobs:
           helm repo index --merge repo/index.yaml repo
       - name: GitHub Pages
         uses: crazy-max/ghaction-github-pages@v1.2.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           allow_empty_commit: false
           build_dir: repo
