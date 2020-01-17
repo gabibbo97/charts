@@ -1,0 +1,47 @@
+{{- define "dex.config" }}
+issuer: {{ if .Values.dexExternalURL }}{{ .Values.dexExternalURL }}{{ else }}https://{{ (first .Values.ingress.hosts).host }}{{ end }}
+storage:
+  type: kubernetes
+  config:
+    inCluster: true
+
+web:
+  http: 0.0.0.0:8080
+telemetry:
+  http: 0.0.0.0:8888
+
+{{- if .Values.JSONLogging }}
+logger:
+  format: "json"
+{{- end }}
+
+oauth2: {{ .Values.OAuth2 | toYaml | nindent 2 }}
+
+connectors: {{ .Values.connectors | toYaml | nindent 2 }}
+
+{{/* Static clients */}}
+{{- if .Values.staticClients }}
+staticClients:
+  {{- range $i, $clientData := .Values.staticClients }}
+  - {{ $clientData | toYaml | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{/* Static passwords */}}
+enablePasswordDB: {{ ne 0 (len .Values.staticPasswords) | toYaml }}
+{{- if .Values.staticPasswords }}
+staticPasswords:
+  {{- range $i, $userData := .Values.staticPasswords }}
+  - {{ $userData | toYaml | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "dex.fullname" . }}
+  labels:
+    {{- include "dex.labels" . | nindent 4 }}
+data:
+  config.yaml: {{ include "dex.config" . | fromYaml | toYaml | b64enc | quote }}

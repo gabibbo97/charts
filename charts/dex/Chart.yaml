@@ -1,0 +1,15 @@
+apiVersion: v2
+name: dex
+version: 3.0.0
+description: OpenID Connect Identity (OIDC) and OAuth 2.0 Provider with Pluggable Connectors
+type: application
+home: https://github.com/dexidp/dex
+keywords:
+  - authentication
+  - idp
+  - oidc
+maintainers:
+  - name: gabibbo97
+    email: gabibbo97@gmail.com
+icon: https://raw.githubusercontent.com/dexidp/dex/master/Documentation/logos/dex-horizontal-color.png
+appVersion: "v2.21.0"

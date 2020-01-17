@@ -1,0 +1,127 @@
+# Default values for dex.
+replicaCount: 1
+
+image:
+  repository: quay.io/dexidp/dex
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  # Standard Dex functionality will be exposed here
+  http:
+    type: ClusterIP
+    port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Set log format to JSON
+JSONLogging: false
+
+# Dex external URL
+# Will be defaulted to ingress.hosts[0].host if not present
+dexExternalURL: ''
+
+# This structure does map 1:1 with the corresponding value in the config file
+OAuth2:
+  # Allowed response types
+  # use ["code", "token", "id_token"] to enable implicit flow for web-only clients
+  responseTypes: [ "code" ]
+  # By default, Dex will ask for approval to share data with application
+  # (approval for sharing data from connected IdP to Dex is separate process on IdP)
+  skipApprovalScreen: true
+  # If only one authentication method is enabled, the default behavior is to
+  # go directly to it. For connected IdPs, this redirects the browser away
+  # from application to upstream provider such as the Google login page
+  alwaysShowLoginScreen: false
+
+# Use connectors from this list
+connectors:
+  - type: mockCallback
+    id: mock
+    name: Example connector
+  # - type: <Connector kind>
+  #   name: <Connector name>
+  #   id: <Connector ID>
+  #   config:
+  #     <YAML Configuration>
+
+
+# Instead of reading from an external storage, use this list of clients.
+#
+# If this option isn't chosen clients may be added through the gRPC API.
+staticClients:
+  - id: example-app
+    redirectURIs:
+    - 'http://127.0.0.1:5555/callback'
+    name: 'Example App'
+    secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+  # - id: <Client ID>
+  #   redirectURIs:
+  #   - <Redirect URI pattern>
+  #   name: <Client name>
+  #   secret: <Client secret>
+  #   # Allow other client to issue tokens
+  #   # Valid for this one
+  #   # e.g. auth webapp and backend
+  #   trustedPeers:
+  #   - <Other client ID>
+
+# Create a static user mapping
+staticPasswords:
+  - email: "admin@example.com"
+    # bcrypt hash of the string "password"
+    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+    username: "admin"
+  # - email: "<email>"
+  #   hash: "<bcrypt hash>"
+  #   username: "<username>"
