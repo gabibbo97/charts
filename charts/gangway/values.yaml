@@ -1,0 +1,104 @@
+# Default values for gangway.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: gcr.io/heptio-images/gangway
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# If the IDP CA is self-signed provide it here
+trustedCA:
+  content: ''
+  secretName: ''
+
+# Gangway configuration
+config:
+  # The name of the cluster to show on the generated KUBECONFIG
+  clusterName: k8s
+  # The kubernetes API server url
+  apiServerURL: http://example.com:6443
+  # The OIDC IDP Authorization URL
+  authorizeURL: http://example.com/auth
+  # The OIDC IDP Token URL
+  tokenURL: http://example.com/token
+  # The OIDC IDP Userinfo URL
+  audience: http://example.com/userinfo
+  # The OIDC ClientID
+  clientID: gangway
+  # The OIDC Secret
+  clientSecret: gangway
+  # The redirect URL
+  # If empty it will default to ingress.hosts[0].host + '/callback'
+  redirectURL: ''
+  # The OIDC scopes to request
+  scopes:
+    - openid
+    - email
+    - profile
+    - offline_access
+  # The OIDC username claim
+  usernameClaim: name
+  # The OIDC email claim
+  emailClaim: email
+  # Security key
+  # CHANGE THIS
+  sessionSecurityKey: verySecureKey

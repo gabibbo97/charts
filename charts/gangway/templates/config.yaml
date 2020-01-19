@@ -1,0 +1,120 @@
+{{- define "gangway.config" }}
+# The address to listen on. Defaults to 0.0.0.0 to listen on all interfaces.
+# Env var: GANGWAY_HOST
+host: 0.0.0.0
+
+# The port to listen on. Defaults to 8080.
+# Env var: GANGWAY_PORT
+port: 8080
+
+# The cluster name. Used in UI and kubectl config instructions.
+# Env var: GANGWAY_CLUSTER_NAME
+clusterName: "${GANGWAY_CLUSTER_NAME}"
+
+# OAuth2 URL to start authorization flow.
+# Env var: GANGWAY_AUTHORIZE_URL
+authorizeURL: "${GANGWAY_AUTHORIZE_URL}"
+
+# OAuth2 URL to obtain access tokens.
+# Env var: GANGWAY_TOKEN_URL
+tokenURL: "${GANGWAY_TOKEN_URL}"
+
+# Endpoint that provides user profile information [optional]. Not all providers
+# will require this.
+# Env var: GANGWAY_AUDIENCE
+audience: "${GANGWAY_AUDIENCE}"
+
+# Used to specify the scope of the requested Oauth authorization.
+scopes:
+{{- range $i, $scope := .Values.config.scopes }}
+  - {{ $scope }}
+{{- end }}
+
+# Where to redirect back to. This should be a URL where gangway is reachable.
+# Typically this also needs to be registered as part of the oauth application
+# with the oAuth provider.
+# Env var: GANGWAY_REDIRECT_URL
+redirectURL: "${GANGWAY_REDIRECT_URL}"
+
+# API client ID as indicated by the identity provider
+# Env var: GANGWAY_CLIENT_ID
+clientID: "${GANGWAY_CLIENT_ID}"
+
+# API client secret as indicated by the identity provider
+# Env var: GANGWAY_CLIENT_SECRET
+clientSecret: "${GANGWAY_CLIENT_SECRET}"
+
+# The JWT claim to use as the username. This is used in UI.
+# Default is "nickname". This is combined with the clusterName
+# for the "user" portion of the kubeconfig.
+# Env var: GANGWAY_USERNAME_CLAIM
+usernameClaim: "${GANGWAY_USERNAME_CLAIM}"
+
+# The JWT claim to use as the email.
+# Env var: GANGWAY_EMAIL_CLAIM
+emailClaim: "${GANGWAY_EMAIL_CLAIM}"
+
+# The API server endpoint used to configure kubectl
+# Env var: GANGWAY_APISERVER_URL
+apiServerURL: "${GANGWAY_APISERVER_URL}"
+
+{{- if or .Values.trustedCA.content .Values.trustedCA.secretName }}
+# The path to a root CA to trust for self signed certificates at the Oauth2 URLs
+# Env var: GANGWAY_TRUSTED_CA_PATH
+trustedCAPath: "${GANGWAY_TRUSTED_CA_PATH}"
+{{- end }}
+{{- end }}
+{{/* CA secret */}}
+{{- if .Values.trustedCA.content }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "gangway.fullname" . }}-trusted-ca
+  labels:
+    {{- include "gangway.labels" . | nindent 4 }}
+data:
+  tls.crt: {{ .Values.trustedCA.content | b64enc | quote }}
+type: kubernetes.io/tls
+{{- end }}
+{{/* Environment secrets */}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "gangway.fullname" . }}
+  labels:
+    {{- include "gangway.labels" . | nindent 4 }}
+data:
+  GANGWAY_CLIENT_SECRET: {{ .Values.config.clientSecret | b64enc | quote }}
+  SESSION_SECURITY_KEY: {{ .Values.config.sessionSecurityKey | b64enc | quote }}
+{{/* ConfigMap */}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gangway.fullname" . }}-env
+  labels:
+    {{- include "gangway.labels" . | nindent 4 }}
+data:
+  GANGWAY_CLUSTER_NAME: {{ .Values.config.clusterName | quote }}
+  GANGWAY_AUTHORIZE_URL: {{ .Values.config.authorizeURL | quote }}
+  GANGWAY_TOKEN_URL: {{ .Values.config.tokenURL | quote }}
+  GANGWAY_AUDIENCE: {{ .Values.config.audience | quote }}
+  GANGWAY_REDIRECT_URL: {{ if not .Values.config.redirectURL }}{{ printf "https://%s/callback" (first .Values.ingress.hosts).host | quote }}{{ else }}{{ .Values.config.redirectURL | quote }}{{ end }}
+  GANGWAY_CLIENT_ID: {{ .Values.config.clientID | quote }}
+  GANGWAY_USERNAME_CLAIM: {{ .Values.config.usernameClaim | quote }}
+  GANGWAY_EMAIL_CLAIM: {{ .Values.config.emailClaim | quote }}
+  GANGWAY_APISERVER_URL: {{ .Values.config.apiServerURL | quote }}
+  {{- if or .Values.trustedCA.content .Values.trustedCA.secretName }}
+  GANGWAY_TRUSTED_CA_PATH: "/etc/gangway/trusted-ca/tls.crt"
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gangway.fullname" . }}
+  labels:
+    {{- include "gangway.labels" . | nindent 4 }}
+data:
+  gangway.yaml: |- {{ include "gangway.config" . | fromYaml | toYaml | nindent 4 }}
