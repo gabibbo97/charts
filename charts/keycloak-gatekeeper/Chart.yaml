@@ -1,6 +1,6 @@
 apiVersion: v2
 name: keycloak-gatekeeper
-version: 2.0.0
+version: 2.1.0
 description: Keycloak gatekeeper
 type: application
 home: https://www.keycloak.org

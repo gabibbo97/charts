@@ -14,6 +14,13 @@ helm install gabibbo97/keycloak-gatekeeper \
     --set ingress.hosts[0]=my-svc-auth.example.com
 ```
 
+## Upgrade notes
+
+From `2.x.0` to `2.1.0`
+From `1.5.x` to `1.6.0`
+
+The deployment has to be deleted and readded due to the [immutability of the selector field](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#label-selector-updates)
+
 ## Introduction
 
 This chart bootstraps an authenticating proxy for a service.

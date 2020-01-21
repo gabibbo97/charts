@@ -57,7 +57,6 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 Chart common selectors
 */}}
 {{- define "keycloak-gatekeeper.selector" -}}
-helm.sh/chart: {{ include "keycloak-gatekeeper.chart" . }}
 app.kubernetes.io/name: {{ include "keycloak-gatekeeper.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
