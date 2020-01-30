@@ -18,5 +18,6 @@ helm repo update
 ### Charts
 
 * [dex](charts/dex/README.md)
+* [gangway](charts/gangway/README.md)
 * [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
 * [pullsecret](charts/pullsecret/README.md)
