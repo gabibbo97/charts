@@ -46,20 +46,16 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/dex/cfg
-          livenessProbe:
+          {{- range $i, $probeType := list "liveness" "readiness" }}
+          {{ $probeType }}Probe:
+            initialDelaySeconds: 30
             httpGet:
               path: /healthz
               port: http
               httpHeaders:
                 - name: Host
-                  value: {{ if .Values.dexExternalURL }}{{ trimPrefix "http" .Values.dexExternalURL | trimPrefix "https" | trimPrefix "://" }}{{ else }}{{ (first .Values.ingress.hosts).host }}{{ end }}
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: http
-              httpHeaders:
-                - name: Host
-                  value: {{ if .Values.dexExternalURL }}{{ trimPrefix "http" .Values.dexExternalURL | trimPrefix "https" | trimPrefix "://" }}{{ else }}{{ (first .Values.ingress.hosts).host }}{{ end }}
+                  value: {{ if $.Values.dexExternalURL }}{{ trimPrefix "http" $.Values.dexExternalURL | trimPrefix "https" | trimPrefix "://" }}{{ else }}{{ (first $.Values.ingress.hosts).host }}{{ end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
