@@ -64,6 +64,12 @@ tolerations: []
 
 affinity: {}
 
+# Prometheus operator
+prometheusOperator:
+  # Deploy a service monitor
+  serviceMonitor:
+    enable: false
+
 # Set log format to JSON
 JSONLogging: false
 
