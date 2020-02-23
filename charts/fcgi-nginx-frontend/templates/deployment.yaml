@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fcgi-nginx-frontend.fullname" . }}
+  labels:
+    {{- include "fcgi-nginx-frontend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "fcgi-nginx-frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        nginx.com/configuration-checksum: sha256:{{ include "fcgi-nginx-frontend.nginx-conf" . | sha256sum | trunc 32 }}
+      labels:
+        {{- include "fcgi-nginx-frontend.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "fcgi-nginx-frontend.serviceAccountName" . }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "fcgi-nginx-frontend.fullname" . }}
+      containers:
+        - name: nginx
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - nginx
+            - -c
+            - /etc/nginx/nginx.conf
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: health
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

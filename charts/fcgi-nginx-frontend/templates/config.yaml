@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fcgi-nginx-frontend.fullname" . }}
+  labels:
+    {{- include "fcgi-nginx-frontend.labels" . | nindent 4 }}
+data:
+  nginx.conf: |-
+    {{- include "fcgi-nginx-frontend.nginx-conf" . | indent 4 }}
