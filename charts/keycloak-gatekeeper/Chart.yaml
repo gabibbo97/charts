@@ -1,6 +1,6 @@
 apiVersion: v2
 name: keycloak-gatekeeper
-version: 2.1.0
+version: 2.2.0
 description: Keycloak gatekeeper
 type: application
 home: https://www.keycloak.org
@@ -16,4 +16,4 @@ maintainers:
   - name: gabibbo97
     email: gabibbo97@gmail.com
 icon: https://raw.githubusercontent.com/keycloak/keycloak-misc/master/logo/keycloak_logo_600px.svg
-appVersion: "8.0.1"
+appVersion: "9.0.0"
