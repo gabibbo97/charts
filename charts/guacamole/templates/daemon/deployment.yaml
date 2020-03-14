@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "guacamole.fullname" . }}-daemon
+  labels: {{- include "guacamole.labels.daemon" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "guacamole.selectorLabels.daemon" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "guacamole.selectorLabels.daemon" . | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range $i, $name := .Values.imagePullSecrets }}
+        - name: {{ $name }}
+        {{- end }}
+      {{- end }}
+      serviceAccountName: {{ include "guacamole.serviceAccountName" . }}
+      containers:
+        - name: guacd
+          image: {{ printf "%s:%s" .Values.daemon.image.repository .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.daemon.image.pullPolicy }}
+          ports:
+            - name: guacd
+              containerPort: 4822

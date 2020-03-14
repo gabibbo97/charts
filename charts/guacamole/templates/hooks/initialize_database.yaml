@@ -1,0 +1,68 @@
+{{- if .Values.hooks.initializeDatabase.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "guacamole.fullname" . }}-frontend-initialize-database
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels: {{- include "guacamole.labels.hook" . | nindent 4 }}
+data:
+  PGPASSWORD: {{ .Values.database.postgres.password | b64enc | quote }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "guacamole.fullname" . }}-frontend-initialize-database
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels: {{- include "guacamole.labels.hook" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      labels: {{- include "guacamole.labels.hook" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: scratchpad
+          emptyDir: {}
+      initContainers:
+        - name: create-sql-manifests
+          image: {{ printf "%s:%s" .Values.frontend.image.repository .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - >-
+              /opt/guacamole/bin/initdb.sh
+              --postgres
+              > /scratchpad/init.sql
+          volumeMounts:
+            - name: scratchpad
+              mountPath: /scratchpad
+      containers:
+        - name: setup-database
+          image: {{ .Values.hooks.initializeDatabase.postgresImage }}
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - >-
+              psql
+              --file=/scratchpad/init.sql
+              --host={{ .Values.database.postgres.host }}
+              --dbname={{ .Values.database.postgres.database }}
+              --username={{ .Values.database.postgres.user }}
+          envFrom:
+            - secretRef:
+                name: {{ include "guacamole.fullname" . }}-frontend-initialize-database
+          volumeMounts:
+            - name: scratchpad
+              mountPath: /scratchpad
+{{- end }}

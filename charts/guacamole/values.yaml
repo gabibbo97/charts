@@ -1,0 +1,72 @@
+#
+# Chart-wide settings
+#
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+#
+# Settings for the Guacamole daemon guacd
+#
+daemon:
+  image:
+    repository: guacamole/guacd
+    pullPolicy: IfNotPresent
+
+  networkPolicy:
+    #
+    # Deploy a restrictive network policy
+    # allowing connections only from the frontend
+    #
+    enabled: true
+
+#
+# Settings for the Guacamole frontend
+#
+frontend:
+  image:
+    repository: guacamole/guacamole
+    pullPolicy: IfNotPresent
+  ingress:
+    enabled: false
+    annotations:
+      nginx.ingress.kubernetes.io/app-root: /guacamole
+      nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    hosts: []
+      # - host: example.com
+      #   paths: ['/']
+    tls: []
+      # - hosts:
+      #     - example.com
+      #   secretName: ingress-tls
+
+#
+# Database settings
+#
+database:
+  kind: postgres # Only supported value at the moment
+  postgres:
+    host: ''
+    database: ''
+    user: ''
+    password: ''
+
+#
+# Hook settings
+#
+hooks:
+  #
+  # Inizializes the provided database on chart installation
+  #
+  initializeDatabase:
+    enabled: true
+    postgresImage: postgres:12.2

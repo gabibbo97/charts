@@ -1,0 +1,15 @@
+{{- if .Values.daemon.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "guacamole.fullname" . }}-daemon
+  labels: {{- include "guacamole.labels.daemon" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {{- include "guacamole.selectorLabels.daemon" . | nindent 6 }}
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {{- include "guacamole.selectorLabels.frontend" . | nindent 14 }}
+{{- end }}

@@ -1,0 +1,36 @@
+{{- if .Values.frontend.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ include "guacamole.fullname" . }}-frontend
+  {{- if .Values.frontend.ingress.annotations }}
+  annotations: {{- .Values.frontend.ingress.annotations | toYaml | nindent 4 }}
+  labels: {{- include "guacamole.labels.frontend" . | nindent 4 }}
+spec:
+  {{- if .Values.frontend.ingress.hosts }}
+  rules:
+    {{- range $i, $host := .Values.frontend.ingress.hosts }}
+    - host: {{ $host.host }}
+      http:
+        paths:
+          {{- range $j, $path := $host.paths }}
+          - path: {{ $path }}
+            backend:
+              serviceName: {{ include "guacamole.fullname" $ }}-frontend
+              servicePort: http
+          {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.frontend.ingress.tls }}
+  tls:
+    {{- range $i, $tls := .Values.frontend.ingress.tls }}
+    - secretName: {{ $tls.secretName }}
+      hosts:
+        {{- range $j, $host := $tls.hosts }}
+        - {{ $host }}
+        {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

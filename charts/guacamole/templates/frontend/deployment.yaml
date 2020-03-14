@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "guacamole.fullname" . }}-frontend
+  labels: {{- include "guacamole.labels.frontend" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "guacamole.selectorLabels.frontend" . | nindent 6 }}
+  template:
+    metadata:
+      #
+      # Annotations to recreate deployment if config changes
+      #
+      annotations:
+        helm.sh/db-config-sha256: {{ .Values.database | toJson | sha256sum | trunc 32 }}
+      labels: {{- include "guacamole.selectorLabels.frontend" . | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range $i, $name := .Values.imagePullSecrets }}
+        - name: {{ $name }}
+        {{- end }}
+      {{- end }}
+      serviceAccountName: {{ include "guacamole.serviceAccountName" . }}
+      containers:
+        - name: guacamole
+          image: {{ printf "%s:%s" .Values.frontend.image.repository .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          env:
+            # Guacamole daemon location
+            - name: GUACD_HOSTNAME
+              value: {{ include "guacamole.fullname" . }}-daemon.{{ .Release.Namespace }}.svc
+            - name: GUACD_PORT
+              value: {{ 4822 | quote }}
+            # Database credentials
+            - name: POSTGRES_HOSTNAME
+              value: {{ .Values.database.postgres.host }}
+            - name: POSTGRES_DATABASE
+              value: {{ .Values.database.postgres.database }}
+            - name: POSTGRES_USER
+              value: {{ .Values.database.postgres.user }}
+          envFrom:
+            - secretRef:
+                name: {{ include "guacamole.fullname" . }}-frontend
+          ports:
+            - name: http
+              containerPort: 8080
