@@ -64,7 +64,7 @@ spec:
             {{- end }}
             {{- if .Values.scopes }}
             {{- range $i, $scope := .Values.scopes }}
-            - --scopes="{{ $scope }}"
+            - --scopes={{ $scope }}
             {{- end }}
             {{- end }}
             {{- if .Values.prometheusMetrics }}
