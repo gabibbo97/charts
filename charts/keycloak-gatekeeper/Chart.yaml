@@ -1,8 +1,7 @@
-apiVersion: v2
+apiVersion: v1
 name: keycloak-gatekeeper
 version: 2.2.0
 description: Keycloak gatekeeper
-type: application
 home: https://www.keycloak.org
 sources:
   - https://github.com/keycloak/keycloak-containers
