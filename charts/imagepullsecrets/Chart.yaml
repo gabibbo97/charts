@@ -1,0 +1,13 @@
+apiVersion: v1
+description: Declarative configuration for imagepullsecrets
+engine: gotpl
+keywords:
+- authentication
+- secrets
+- docker-registry
+- imagepullsecrets
+maintainers:
+- email: gabibbo97@gmail.com
+  name: gabibbo97
+name: imagepullsecrets
+version: 2.1.0

@@ -1,0 +1,26 @@
+# Sometimes Kubernetes bugs out parsing the JSON
+# The solution is adding a auth: <base64 encode of user:pass> to the secret itself
+# Set this to true to have this set automatically
+# Since 2.1.0 this field is a no op and the field will always be added
+addAuthField: true
+
+# Populate this object with your own secret
+imagePullSecret: {}
+
+# Simple username-password
+#  registryURL: registry.k8s.example.com:5000
+#  secretName: registry-pullsecret
+#  username: testUser
+#  password: testPassword
+
+# Simple username-password with extra labels and/or annotations
+#  registryURL: annotated.registry.k8s.example.com:5000
+#  secretName: annotated-registry-pullsecret
+#  annotations:
+#    example.com/lorem: 'true'
+#    example.com/ipsum: '1337'
+#  labels:
+#    is-private-registry: 'true'
+#    is-annotated: 'ofcourseitis'
+#  username: testUser
+#  password: testPassword
