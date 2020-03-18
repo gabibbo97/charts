@@ -12,5 +12,11 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    {{- if .Values.dexAPI.enabled }}
+    - port: {{ .Values.service.grpc.port }}
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
+    {{- end }}
   selector:
     {{- include "dex.selectorLabels" . | nindent 4 }}

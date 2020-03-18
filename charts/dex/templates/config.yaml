@@ -10,6 +10,14 @@ web:
 telemetry:
   http: 0.0.0.0:8888
 
+{{- if .Values.dexAPI.enabled }}
+grpc:
+  addr: 0.0.0.0:8080
+  tlsCert: /etc/dex-server-tls/tls.crt
+  tlsKey: /etc/dex-server-tls/tls.key
+  tlsClientCA: /etc/dex-client-ca/tls.crt
+{{- end }}
+
 {{- if .Values.JSONLogging }}
 logger:
   format: "json"
@@ -23,7 +31,10 @@ connectors: {{ .Values.connectors | toYaml | nindent 2 }}
 {{- if .Values.staticClients }}
 staticClients:
   {{- range $i, $clientData := .Values.staticClients }}
-  - {{ $clientData | toYaml | nindent 4 }}
+  {{- $client := deepCopy $clientData }}
+  {{- $_ := set $client "id"     (printf "$DEX_CLIENT_%d_CLIENT_ID" $i) }}
+  {{- $_  = set $client "secret" (printf "$DEX_CLIENT_%d_CLIENT_SECRET" $i) }}
+  - {{ $client | toYaml | nindent 4 }}
   {{- end }}
 {{- end }}
 
@@ -38,10 +49,24 @@ staticPasswords:
 {{- end }}
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dex.fullname" . }}
+  labels:
+    {{- include "dex.labels" . | nindent 4 }}
+data:
+  config.yaml: |- {{- include "dex.config" . | fromYaml | toYaml | nindent 4 }}
+{{- if .Values.staticClients }}
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: {{ include "dex.fullname" . }}
   labels:
     {{- include "dex.labels" . | nindent 4 }}
 data:
-  config.yaml: {{ include "dex.config" . | fromYaml | toYaml | b64enc | quote }}
+  {{- range $i, $connector := .Values.staticClients }}
+  DEX_CLIENT_{{ $i }}_CLIENT_ID: {{ $connector.id | b64enc | quote }}
+  DEX_CLIENT_{{ $i }}_CLIENT_SECRET: {{ $connector.secret | b64enc | quote }}
+  {{- end }}
+{{- end }}

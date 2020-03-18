@@ -13,6 +13,9 @@ spec:
     metadata:
       annotations:
         app.kubernetes.io/configuration-checksum: {{ include "dex.config" . | sha256sum | trunc 32 }}
+        {{- if .Values.staticClients }}
+        app.kubernetes.io/secrets-checksum: {{ .Values.staticClients | toJson | sha256sum | trunc 32  }}
+        {{- end }}
       labels:
         {{- include "dex.selectorLabels" . | nindent 8 }}
     spec:
@@ -25,8 +28,19 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
         - name: config
+          configMap:
+            name: {{ include "dex.fullname" . }}
+        {{- if .Values.dexAPI.enabled }}
+        - name: grpc-ca-tls
           secret:
-            secretName: {{ include "dex.fullname" . }}
+            secretName: {{ .Values.dexAPI.clientCASecret }}
+            items:
+              - key: tls.crt
+                path: tls.crt
+        - name: grpc-server-tls
+          secret:
+            secretName: {{ .Values.dexAPI.serverCertificateSecret }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -38,14 +52,29 @@ spec:
           args:
             - serve
             - /etc/dex/cfg/config.yaml
+          {{- if .Values.staticClients }}
+          envFrom:
+            - secretRef:
+                name: {{ include "dex.fullname" . }}
+          {{- end }}
           ports:
             - name: http
               containerPort: 8080
             - name: telemetry
               containerPort: 8888
+            {{- if .Values.staticClients }}
+            - name: grpc
+              containerPort: 8080
+            {{- end }}
           volumeMounts:
             - name: config
               mountPath: /etc/dex/cfg
+            {{- if .Values.dexAPI.enabled }}
+            - name: grpc-ca-tls
+              mountPath: /etc/dex-client-ca/tls.crt
+            - name: grpc-server-tls
+              mountPath: /etc/dex-server-tls/tls.crt
+            {{- end }}
           {{- range $i, $probeType := list "liveness" "readiness" }}
           {{ $probeType }}Probe:
             initialDelaySeconds: 30

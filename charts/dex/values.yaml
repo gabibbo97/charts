@@ -32,6 +32,9 @@ service:
   http:
     type: ClusterIP
     port: 80
+  # Dex GRPC API will be exposed here
+  grpc:
+    port: 8000
 
 ingress:
   enabled: false
@@ -77,6 +80,14 @@ JSONLogging: false
 # Will be defaulted to ingress.hosts[0].host if not present
 dexExternalURL: ''
 
+dexAPI:
+  # Serve the Dex GRPC API
+  enabled: false
+  # GRPC API server certificate secret
+  serverCertificateSecret: ''
+  # GRPC API client CA certificate secret
+  clientCASecret: ''
+
 # This structure does map 1:1 with the corresponding value in the config file
 OAuth2:
   # Allowed response types
@@ -89,6 +100,8 @@ OAuth2:
   # go directly to it. For connected IdPs, this redirects the browser away
   # from application to upstream provider such as the Google login page
   alwaysShowLoginScreen: false
+  # Uncomment the passwordConnector to use a specific connector for password grants
+  # passwordConnector: local
 
 # Use connectors from this list
 connectors:

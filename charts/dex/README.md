@@ -14,17 +14,18 @@ This chart bootstraps an in-cluster dex identity provider
 
 ## Configuration options
 
-| Parameter                                  | Description                                  |             Default              |
-| ------------------------------------------ | -------------------------------------------- | :------------------------------: |
-| `connectors`                               | List of Dex connectors                       |               `[]`               |
-| `staticClients`                            | List of Dex clients                          |               `[]`               |
-| `staticPasswords`                          | List of Dex users                            |               `[]`               |
-| `JSONLogging`                              | Enable JSON format for logs                  |             `false`              |
-| `dexExternalURL`                           | URL that Dex will use as its own             | Value of `ingress.hosts[0].host` |
-| `OAuth2.responseTypes`                     | The OAuth2 flows that will be supported      |            `['code']`            |
-| `OAuth2.skipApprovalScreen`                | If possible avoid showing an approval screen |              `true`              |
-| `OAuth2.alwaysShowLoginScreen`             | Always show a login screen                   |             `false`              |
-| `prometheusOperator.serviceMonitor.enable` | Deploy a `ServiceMonitor` resource           |             `false`              |
+| Parameter                                  | Description                                                                    |             Default              |
+| ------------------------------------------ | ------------------------------------------------------------------------------ | :------------------------------: |
+| `connectors`                               | List of Dex connectors                                                         |               `[]`               |
+| `staticClients`                            | List of Dex clients                                                            |               `[]`               |
+| `staticPasswords`                          | List of Dex users                                                              |               `[]`               |
+| `JSONLogging`                              | Enable JSON format for logs                                                    |             `false`              |
+| `dexExternalURL`                           | URL that Dex will use as its own                                               | Value of `ingress.hosts[0].host` |
+| `OAuth2.responseTypes`                     | The OAuth2 flows that will be supported                                        |            `['code']`            |
+| `OAuth2.skipApprovalScreen`                | If possible avoid showing an approval screen                                   |              `true`              |
+| `OAuth2.alwaysShowLoginScreen`             | Always show a login screen                                                     |             `false`              |
+| `OAuth2.passwordConnector`                 | Use one of the predefined connectors instead of Dex to perform password grants |                ``                |
+| `prometheusOperator.serviceMonitor.enable` | Deploy a `ServiceMonitor` resource                                             |             `false`              |
 
 ### Connectors
 
