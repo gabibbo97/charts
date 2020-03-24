@@ -16,6 +16,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build the Docker image
       run: |
-        docker build . --file Dockerfile --tag gabibbo97/papermc:1.15.2-143
+        docker build --file Dockerfile --tag gabibbo97/papermc:1.15.2-143 containers/papermc
         docker login -u gabibbo97 -p $DOCKER_REGISTRY_TOKEN
         docker push gabibbo97/papermc:1.15.2-143
