@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e # Fail on error
+
 # Automatically accept the EULA
 if [ "$ACCEPT_EULA" = "y" ]; then
   echo 'Accepting Minecraft EULA'
