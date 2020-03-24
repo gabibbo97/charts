@@ -3,6 +3,9 @@ FROM alpine AS download-papermc
 ENV PAPERMC_MINECRAFT_VERSION=1.15.2
 ENV PAPERMC_VERSION=143
 
+LABEL "papermc.io/minecraft-version" ${PAPERMC_MINECRAFT_VERSION}
+LABEL "papermc.io/version" ${PAPERMC_VERSION}
+
 WORKDIR /opt
 RUN wget https://papermc.io/api/v1/paper/$PAPERMC_MINECRAFT_VERSION/$PAPERMC_VERSION/download -O papermc.jar
 

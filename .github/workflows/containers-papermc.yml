@@ -15,7 +15,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
+      env:
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
       run: |
         docker build --tag gabibbo97/papermc:1.15.2-143 containers/papermc
-        docker login -u gabibbo97 -p $DOCKER_REGISTRY_TOKEN
+        docker login -u gabibbo97 -p $DOCKER_PASSWORD
         docker push gabibbo97/papermc:1.15.2-143
