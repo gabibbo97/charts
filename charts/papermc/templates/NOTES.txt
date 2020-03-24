@@ -1,0 +1,18 @@
+{{- if not .Values.acceptEULA }}
+##################################
+# YOU HAVE NOT ACCEPTED THE EULA #
+#  THE SERVER WILL NOT START UP  #
+##################################
+{{- end }}
+{{- if not .Values.persistence.enabled }}
+#########################################
+#    YOU HAVE NOT ENABLED PERSISTENCE   #
+#  ALL DATA WILL BE LOST ON POD RESTART #
+#########################################
+{{- end }}
+# Access logs
+kubectl -n {{ .Release.Namespace }} logs deployment/{{ include "papermc.fullname" . }}
+# Port forwarding
+kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "papermc.fullname" . }} {{ .Values.service.port }}
+# Install plugins
+kubectl -n {{ .Release.Namespace }} cp plugin.jar POD_NAME:/var/lib/papermc/plugins

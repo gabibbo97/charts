@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "papermc.fullname" . }}
+  labels:
+    {{- include "papermc.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: minecraft
+      protocol: TCP
+      name: minecraft
+      {{- if and (eq "NodePort" .Values.service.type) .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}
+  selector:
+    {{- include "papermc.selectorLabels" . | nindent 4 }}

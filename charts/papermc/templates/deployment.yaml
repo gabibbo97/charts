@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "papermc.fullname" . }}
+  labels:
+    {{- include "papermc.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "papermc.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- include "papermc.configChecksumAnnotations" . | indent 8 }}
+      labels:
+        {{- include "papermc.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range $i, $secretName := .Values.imagePullSecrets }}
+        - name: {{ $secretName }}
+        {{- end }}
+      {{- end }}
+      serviceAccountName: {{ include "papermc.serviceAccountName" . }}
+      volumes:
+        - name: paper-config
+          configMap:
+            name: {{ include "papermc.fullname" . }}
+        - name: paper-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            {{- if .Values.persistence.existingPVCName }}
+            claimName: {{ .Values.persistence.existingPVCName }}
+            {{- else }}
+            claimName: {{ include "papermc.fullname" . }}
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --nogui
+            - --online-mode={{ if .Values.onlineMode }}true{{ else }}false{{ end }}
+            - --server-port=25565
+            {{- range $k, $v := .Values.extraArgs }}
+            - --{{ $k }}={{ $v }}
+            {{- end }}
+          env:
+            {{- if .Values.acceptEULA }}
+            - name: ACCEPT_EULA
+              value: 'y'
+            {{- end }}
+            {{- if .Values.overwriteSettings }}
+            - name: OVERWRITE_SETTINGS
+              value: 'y'
+            {{- end }}
+            - name: BASE_CONFIG_DIR
+              value: /etc/papermc
+            - name: JAVA_OPTS
+              value: >-
+                -XX:+UnlockExperimentalVMOptions
+                -XX:+UseContainerSupport
+                -XX:MaxRAMPercentage=70
+                {{- range $i, $opt := .Values.extraJAVAopts }}
+                {{ $opt }}
+                {{- end }}
+          workingDir: /var/lib/papermc
+          volumeMounts:
+            - name: paper-config
+              mountPath: /etc/papermc
+            - name: paper-data
+              mountPath: /var/lib/papermc
+              {{- if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+          ports:
+            - name: minecraft
+              containerPort: 25565
+              protocol: TCP
+          {{- range $i, $probe := list "liveness" "readiness" }}
+          {{ $probe }}Probe:
+            tcpSocket:
+              port: minecraft
+            initialDelaySeconds: 30
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

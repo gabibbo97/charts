@@ -1,0 +1,127 @@
+# Default values for papermc.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: gabibbo97/papermc
+  tag: 1.15.2-143
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+service:
+  type: ClusterIP
+  port: 25565
+  nodePort: 30565 # This will only work if type is "NodePort"
+
+resources:
+  #
+  # Memory resource and limit will map to -Xms and -Xmx parameters in the JVM option string
+  #
+  limits:
+    cpu: 1250m
+    memory: 1.2Gi
+  requests:
+    cpu: 100m # 10% CPUs
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+#
+# Persistence settings
+#
+persistence:
+  enabled: false
+
+  # Manually created PVC
+  existingPVCName: ""
+
+  # Create a PVC
+  storageClassName: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+  # Subpath inside of the volume
+  subPath: ""
+
+#
+# Minecraft settings
+#
+
+# Do you accept Minecraft EULA?
+acceptEULA: false
+
+# Extra args to paper
+extraArgs:
+  max-players: 50
+
+# Extra JAVA opts
+extraJAVAopts: []
+
+# Online mode (allow access only to accounts known to Mojang)
+onlineMode: true
+
+# Would you like these settings to potentially overwrite the preexisting ones?
+overwriteSettings: true
+
+configs:
+  # See https://minecraft.gamepedia.com/Server.properties
+  server.properties:
+    difficulty: hard
+    gamemode: survival
+    generate-structures: true
+    motd: 'A Kubernetes powered Minecraft server'
+    pvp: true
+    view-distance: 16
+    white-list: false
+    enforce-whitelist: false
+
+  # Whitelist
+  whitelist.json: []
+    # - name: user
+    #   uuid: xxxxxxxx-yyyy-zzzz-vvvv-wwwwwwwwwwww
+
+  # Operators
+  ops.json: []
+    # - name: user
+    #   uuid: xxxxxxxx-yyyy-zzzz-vvvv-wwwwwwwwwwww
+    #   level: 4
+
+  # Add here the options of paper.yml
+  # See https://paper.readthedocs.io/en/latest/server/configuration.html
+  paper.yml:
+    # Default world settings
+    default:
+      per-player-mob-spawns: true
+      optimize-explosions: true
+      remove-corrupt-tile-entities: true
+      keep-spawn-loaded-range: 1
+      # Lootables
+      auto-replenish: true
+      restrict-player-reloot: false
+      reset-seed-on-fill: true
+      refresh-min: 3h
+      refresh-max: 1d
+
+  # Add here the options of bukkit.yml
+  # See https://bukkit.gamepedia.com/Bukkit.yml
+  bukkit.yml: {}
+
+  # Add here the options of spigot.yml
+  # See https://www.spigotmc.org/wiki/spigot-configuration/
+  spigot.yml: {}
