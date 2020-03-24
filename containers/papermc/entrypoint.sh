@@ -50,6 +50,8 @@ fi
 # Setup JVM options
 [ -n "$JAVA_OPTS" ] || JAVA_OPTS=''
 
-echo "Using JAVA_OPTS: $JAVA_OPTS"
+if [ -n "$JAVA_OPTS" ]; then
+  echo "Using JAVA_OPTS: $JAVA_OPTS"
+fi
 
 exec java $JAVA_OPTS -jar /opt/papermc.jar "$@"
