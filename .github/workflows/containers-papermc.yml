@@ -1,0 +1,21 @@
+name: Build PaperMC image
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - containers/papermc/*
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: |
+        docker build . --file Dockerfile --tag gabibbo97/papermc:1.15.2-143
+        docker login -u gabibbo97 -p $DOCKER_REGISTRY_TOKEN
+        docker push gabibbo97/papermc:1.15.2-143
