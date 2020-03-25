@@ -9,7 +9,7 @@ LABEL "papermc.io/version" ${PAPERMC_VERSION}
 WORKDIR /opt
 RUN wget https://papermc.io/api/v1/paper/$PAPERMC_MINECRAFT_VERSION/$PAPERMC_VERSION/download -O papermc.jar
 
-FROM openjdk:11 AS papermc
+FROM openjdk:8 AS papermc
 
 RUN useradd \
   -M \
