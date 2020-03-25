@@ -84,12 +84,6 @@ spec:
             - name: minecraft
               containerPort: 25565
               protocol: TCP
-          {{- range $i, $probe := list "liveness" "readiness" }}
-          {{ $probe }}Probe:
-            tcpSocket:
-              port: minecraft
-            initialDelaySeconds: 30
-          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
