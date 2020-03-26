@@ -84,6 +84,16 @@ spec:
             - name: minecraft
               containerPort: 25565
               protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+                - /healthcheck
+            initialDelaySeconds: 60
+          readinessProbe:
+            exec:
+              command:
+                - /healthcheck
+            initialDelaySeconds: 60
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

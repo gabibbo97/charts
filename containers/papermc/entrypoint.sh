@@ -2,6 +2,10 @@
 
 set -e # Fail on error
 
+# List files
+echo "File list of $(pwd):"
+ls -la
+
 # Automatically accept the EULA
 if [ "$ACCEPT_EULA" = "y" ]; then
   echo 'Accepting Minecraft EULA'
