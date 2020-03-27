@@ -18,6 +18,6 @@ jobs:
       env:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
       run: |
-        docker build --tag gabibbo97/papermc:1.15.2-145 containers/papermc
+        docker build --tag gabibbo97/papermc:1.15.2-146 containers/papermc
         docker login -u gabibbo97 -p $DOCKER_PASSWORD
-        docker push gabibbo97/papermc:1.15.2-145
+        docker push gabibbo97/papermc:1.15.2-146
