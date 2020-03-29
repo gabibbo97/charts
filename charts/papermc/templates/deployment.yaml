@@ -88,12 +88,12 @@ spec:
             exec:
               command:
                 - /healthcheck
-            initialDelaySeconds: 60
+            initialDelaySeconds: {{ .Values.probesTimeout }}
           readinessProbe:
             exec:
               command:
                 - /healthcheck
-            initialDelaySeconds: 60
+            initialDelaySeconds: {{ .Values.probesTimeout }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
