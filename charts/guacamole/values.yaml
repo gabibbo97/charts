@@ -22,6 +22,11 @@ daemon:
     repository: guacamole/guacd
     pullPolicy: IfNotPresent
 
+  # Enable PodDisruptionBudget
+  pdb:
+    enabled: false
+    minAvailable: 1
+
   networkPolicy:
     #
     # Deploy a restrictive network policy
@@ -36,6 +41,10 @@ frontend:
   image:
     repository: guacamole/guacamole
     pullPolicy: IfNotPresent
+  # Enable PodDisruptionBudget
+  pdb:
+    enabled: false
+    minAvailable: 1
   ingress:
     enabled: false
     annotations:

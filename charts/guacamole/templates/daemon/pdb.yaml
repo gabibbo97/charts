@@ -1,0 +1,11 @@
+{{- if .Values.daemon.pdb.enabled }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "guacamole.fullname" . }}-daemon
+  labels: {{- include "guacamole.labels.daemon" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.daemon.pdb.minAvailable }}
+  selector:
+    matchLabels: {{- include "guacamole.selectorLabels.daemon" . | nindent 6 }}
+{{- end }}
