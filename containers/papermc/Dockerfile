@@ -1,7 +1,7 @@
 FROM alpine AS download-papermc
 
 ENV PAPERMC_MINECRAFT_VERSION=1.15.2
-ENV PAPERMC_VERSION=146
+ENV PAPERMC_VERSION=149
 
 LABEL "papermc.io/minecraft-version" ${PAPERMC_MINECRAFT_VERSION}
 LABEL "papermc.io/version" ${PAPERMC_VERSION}
