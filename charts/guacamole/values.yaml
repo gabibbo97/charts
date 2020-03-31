@@ -50,6 +50,13 @@ frontend:
     annotations:
       nginx.ingress.kubernetes.io/app-root: /guacamole
       nginx.ingress.kubernetes.io/proxy-buffering: "off"
+      nginx.ingress.kubernetes.io/affinity: 'cookie'
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600s"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600s"
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection \$http_connection;
+
     hosts: []
       # - host: example.com
       #   paths: ['/']

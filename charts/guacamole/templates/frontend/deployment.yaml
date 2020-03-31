@@ -24,11 +24,21 @@ spec:
         {{- end }}
       {{- end }}
       serviceAccountName: {{ include "guacamole.serviceAccountName" . }}
+      volumes:
+        - name: scripts
+          configMap:
+            defaultMode: 0755
+            name: {{ include "guacamole.fullname" . }}-frontend
       containers:
         - name: guacamole
           image: {{ printf "%s:%s" .Values.frontend.image.repository .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          command:
+            - /opt/guacamole-scripts/startup.sh
           env:
+            # Script settings
+            - name: GUACAMOLE_INTERNAL_PROXIES
+              value: '.*'
             # Guacamole daemon location
             - name: GUACD_HOSTNAME
               value: {{ include "guacamole.fullname" . }}-daemon.{{ .Release.Namespace }}.svc
@@ -47,3 +57,6 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+          volumeMounts:
+            - name: scripts
+              mountPath: /opt/guacamole-scripts
