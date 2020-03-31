@@ -60,3 +60,11 @@ spec:
           volumeMounts:
             - name: scripts
               mountPath: /opt/guacamole-scripts
+          livenessProbe:
+            httpGet:
+              path: /guacamole
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /guacamole
+              port: http
