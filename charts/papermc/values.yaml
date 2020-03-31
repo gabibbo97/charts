@@ -4,7 +4,7 @@
 
 image:
   repository: gabibbo97/papermc
-  tag: 1.15.2-149
+  tag: 1.15.2-153
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
