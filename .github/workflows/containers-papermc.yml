@@ -4,6 +4,7 @@ on:
   push:
     branches: [ master ]
     paths:
+      - .github/workflows/containers-papermc.yml
       - containers/papermc/*
 
 jobs:
@@ -17,7 +18,15 @@ jobs:
     - name: Build the Docker image
       env:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+        MINECRAFT_VERSION: '1.15.2'
+        PAPERMC_VERSION: '158'
       run: |
-        docker build --tag gabibbo97/papermc:1.15.2-155 containers/papermc
+        docker build \
+          --build-arg PAPERMC_MINECRAFT_VERSION=$MINECRAFT_VERSION \
+          --build-arg PAPERMC_VERSION=$PAPERMC_VERSION \
+          --tag gabibbo97/papermc:$MINECRAFT_VERSION \
+          --tag gabibbo97/papermc:$MINECRAFT_VERSION-$PAPERMC_VERSION \
+          containers/papermc
         docker login -u gabibbo97 -p $DOCKER_PASSWORD
-        docker push gabibbo97/papermc:1.15.2-155
+        docker push gabibbo97/papermc:$MINECRAFT_VERSION
+        docker push gabibbo97/papermc:$MINECRAFT_VERSION-$PAPERMC_VERSION
