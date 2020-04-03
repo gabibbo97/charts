@@ -19,7 +19,7 @@ jobs:
       env:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
         MINECRAFT_VERSION: '1.15.2'
-        PAPERMC_VERSION: '158'
+        PAPERMC_VERSION: '161'
       run: |
         docker build \
           --build-arg PAPERMC_MINECRAFT_VERSION=$MINECRAFT_VERSION \
