@@ -57,6 +57,7 @@ This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 | `droolsPolicyEnabled`         | Enable support for Drools Policies (tech preview)            |                `false`                 |
 | `debug`                       | Use verbose logging                                          |                `false`                 |
 | `extraArgs`                   | Additional command line arguments (as `option=value`)        |                  `[]`                  |
+| `extraEnvs`                   | Additional `env` configuration for Container                 |                   ``                   |
 | `podAnnotations`              | Additional annotations to add to the pod template            |                   ``                   |
 
 See also the configuration variables used in [ingress.yaml](templates/ingress.yaml)
