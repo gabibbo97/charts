@@ -152,3 +152,15 @@ prometheusMetrics: true
 # - upstream-timeout=30s
 #
 extraArgs: []
+
+# add any additional container env entries you want here
+#  extraEnvs:
+#    - name: MY_NODE_NAME
+#      valueFrom:
+#        fieldRef:
+#          fieldPath: spec.nodeName
+#    - name: MY_POD_IP
+#      valueFrom:
+#        fieldRef:
+#          fieldPath: status.podIP
+extraEnvs: {}

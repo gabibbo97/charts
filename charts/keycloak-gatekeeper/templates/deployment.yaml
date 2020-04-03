@@ -93,6 +93,10 @@ spec:
                 name: {{ include "keycloak-gatekeeper.fullname" . }}-forwarding
                 optional: false
             {{- end }}
+          {{- with .Values.extraEnvs }}
+          env:
+{{ toYaml . | indent 12 }}
+          {{- end }}
           ports:
             - name: http
               containerPort: 3000
