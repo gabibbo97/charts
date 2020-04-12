@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ldap-account-manager.fullname" . }}
+  labels:
+    {{- include "ldap-account-manager.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ldap-account-manager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        lam.g4b1bb097.dev/env-hash: {{ .Values.extraEnv | toJson | sha256sum | trunc 32 }}
+      labels:
+        {{- include "ldap-account-manager.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "ldap-account-manager.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "ldap-account-manager.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      initContainers:
+        - name: copy-default-configs
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |-
+              # Copy config from /etc
+              mkdir -p /data/etc
+              if ! [ -f /data/etc/config.cfg ]; then
+                cp -a /etc/ldap-account-manager/. /data/etc/
+              fi
+              # Copy config from /var
+              mkdir -p /data/var
+              if ! [ -f /data/var/config/config.cfg ]; then
+                cp -a /var/lib/ldap-account-manager/. /data/var/
+              fi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ include "ldap-account-manager.fullname" . }}-env
+          volumeMounts:
+            - name: data
+              subPath: etc
+              mountPath: /etc/ldap-account-manager
+            - name: data
+              subPath: var
+              mountPath: /var/lib/ldap-account-manager
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /lam
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /lam
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

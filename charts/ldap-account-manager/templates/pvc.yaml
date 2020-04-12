@@ -1,0 +1,16 @@
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "ldap-account-manager.fullname" . }}
+  labels:
+    {{- include "ldap-account-manager.labels" . | nindent 4 }}
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+{{- end }}
