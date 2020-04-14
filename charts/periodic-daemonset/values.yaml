@@ -1,0 +1,25 @@
+# Default values for periodic-daemonset.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: bitnami/kubectl
+  tag: latest
+  pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: ""
+
+podSpec:
+  containers:
+    - name: hello-world
+      image: alpine:latest
+      imagePullPolicy: Always
+      command:
+        - /bin/sh
+        - -c
+      args:
+        - echo "Hello world"
+
+ttlSecondsAfterFinished: 60
+schedule: "*/3 * * * *"
