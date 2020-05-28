@@ -35,6 +35,8 @@ This can be used with Kubernetes-dashboard, Grafana, Jenkins, ...
 | ----------------------------- | ------------------------------------------------------------ | :------------------------------------: |
 | `image.repository`            | docker image repo                                            | `quay.io/keycloak/keycloak-gatekeeper` |
 | `image.pullPolicy`            | docker image pull policy                                     |              IfNotPresent              |
+| `pdb.enabled`                 | Enable the PodDisruptionBudget feature                       |                `false`                 |
+| `pdb.minAvailable`            | Minimum number of pods that should be available              |                  `1`                   |
 | `discoveryURL`                | URL for OpenID autoconfiguration                             |                   ``                   |
 | `upstreamURL`                 | URL of the service to proxy                                  |                   ``                   |
 | `skipUpstreamTlsVerify`       | URL of the service to proxy                                  |                   ``                   |

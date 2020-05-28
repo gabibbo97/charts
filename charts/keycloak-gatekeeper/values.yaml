@@ -46,6 +46,11 @@ tolerations: []
 
 affinity: {}
 
+pdb:
+  # Enable the PodDisruptionBudgets feature
+  enabled: false
+  minAvailable: 1
+
 # URL for OpenID autoconfiguration
 # On Keycloak <server>/auth/realms/<realm_name>
 discoveryURL: ""
