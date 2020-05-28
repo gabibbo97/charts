@@ -18,6 +18,8 @@ helm repo update
 ### Charts
 
 * [dex](charts/dex/README.md)
+* [fcgi-nginx-frontend](charts/fcgi-nginx-frontend/README.md)
 * [gangway](charts/gangway/README.md)
+* [imagepullsecrets](charts/imagepullsecrets/README.md)
 * [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
-* [pullsecret](charts/pullsecret/README.md)
+* [periodic-daemonset](charts/periodic-daemonset/README.md)
