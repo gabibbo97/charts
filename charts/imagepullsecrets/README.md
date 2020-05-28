@@ -18,15 +18,15 @@ helm install gabibbo97/imagepullsecrets \
 
 ## Configuration options
 
-| Parameter                              | Description                                            | Default |
-| -------------------------------------- | ------------------------------------------------------ | :-----: |
-| `addAuthField`                         | Add `auth: <base64 encode of user:pass>` to the secret | `true`  |
-| `imagePullSecrets.registryURL`         | URL of the registry                                    |  `""`   |
-| `imagePullSecrets.secretName`          | Name of the imagepullsecret object for the registry    |  `""`   |
-| `imagePullSecrets.username`            | Username for the registry                              |  `""`   |
-| `imagePullSecrets.password`            | Password for the registry                              |  `""`   |
-| `imagePullSecrets.annotations.<<KEY>>` | Annotations to set on the secret for the registry      |  `{}`   |
-| `imagePullSecrets.labels.<<KEY>>`      | Labels to set on the secret for the registry           |  `{}`   |
+| Parameter                             | Description                                            | Default |
+| ------------------------------------- | ------------------------------------------------------ | :-----: |
+| `addAuthField`                        | Add `auth: <base64 encode of user:pass>` to the secret | `true`  |
+| `imagePullSecret.registryURL`         | URL of the registry                                    |  `""`   |
+| `imagePullSecret.secretName`          | Name of the imagepullsecret object for the registry    |  `""`   |
+| `imagePullSecret.username`            | Username for the registry                              |  `""`   |
+| `imagePullSecret.password`            | Password for the registry                              |  `""`   |
+| `imagePullSecret.annotations.<<KEY>>` | Annotations to set on the secret for the registry      |  `{}`   |
+| `imagePullSecret.labels.<<KEY>>`      | Labels to set on the secret for the registry           |  `{}`   |
 
 ## Usage
 
@@ -52,10 +52,9 @@ On the `ServiceAccount`, set `imagePullSecrets[0].name=registry-pullsecret`
 
 ```yaml
 kind: ServiceAccount
-...
+---
 imagePullSecrets:
-- name: registry-pullsecret
-...
+  - name: registry-pullsecret
 ```
 
 Then on pods that should consume that secret add `spec.serviceAccountName=my-service-account`
