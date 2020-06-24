@@ -84,9 +84,9 @@ You can now use this new client from keycloak-gatekeeper and login with your cre
 
 ## Fine grained rules for authentication
 
-This chart allows to specify rules inside of the `resource` array, these can be used to fine-tweak your authentication endpoints
+This chart allows to specify rules inside of the `rules` array, these can be used to fine-tweak your authentication endpoints
 
-Each element of `resource` is a `|` (pipe separator) delimited list of key, value pairs.
+Each element of `rules` is a `|` (pipe separator) delimited list of key, value pairs.
 
 Here is a non exhaustive list of key-value pairs
 
@@ -101,7 +101,7 @@ Here is a non exhaustive list of key-value pairs
 ## Example
 
 ```yaml
-resources:
+rules:
 - "uri=/admin*|roles=admin,root|require-any-role=true"
 - "uri=/public*|white-listed=true"
 - "uri=/authenticated/users|roles=user"
