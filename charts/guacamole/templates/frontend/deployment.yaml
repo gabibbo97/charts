@@ -50,10 +50,27 @@ spec:
             - name: POSTGRES_DATABASE
               value: {{ .Values.database.postgres.database }}
             - name: POSTGRES_USER
-              value: {{ .Values.database.postgres.user }}
-          envFrom:
-            - secretRef:
-                name: {{ include "guacamole.fullname" . }}-frontend
+              valueFrom:
+                secretKeyRef:
+                  {{- if not .Values.database.postgres.existingSecret }}
+                  name: {{ include "guacamole.fullname" . }}-frontend
+                  key: POSTGRES_USER
+                  {{- else }}
+                  name: {{ .Values.database.postgres.existingSecret }}
+                  key: {{ .Values.database.postgres.existingSecretUsernameKey }}
+                  {{- end }}
+                  optional: false
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if not .Values.database.postgres.existingSecret }}
+                  name: {{ include "guacamole.fullname" . }}-frontend
+                  key: POSTGRES_PASSWORD
+                  {{- else }}
+                  name: {{ .Values.database.postgres.existingSecret }}
+                  key: {{ .Values.database.postgres.existingSecretPasswordKey }}
+                  {{- end }}
+                  optional: false
           ports:
             - name: http
               containerPort: 8080

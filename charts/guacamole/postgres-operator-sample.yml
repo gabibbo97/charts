@@ -1,0 +1,25 @@
+---
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: guacamole-db-cluster
+spec:
+  teamId: "guacamole"
+  volume:
+    size: 1Gi
+  numberOfInstances: 1
+  users:
+    guacamole:
+      - LOGIN
+  databases:
+    guacamole: guacamole
+  postgresql:
+    version: "12"
+  patroni:
+    pg_hba:
+      - hostssl all all 0.0.0.0/0 md5
+      - host    all all 0.0.0.0/0 md5
+
+# --set database.postgres.host=guacamole-db-cluster.$NAMESPACE.svc
+# --set database.postgres.database=guacamole
+# --set database.postgres.existingSecret=guacamole.guacamole-db-cluster.credentials.postgresql.acid.zalan.do

@@ -56,7 +56,7 @@ frontend:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \$http_connection;
-
+      haproxy.org/path-rewrite: '/(.*) /guacamole/\1'
     hosts: []
       # - host: example.com
       #   paths: ['/']
@@ -75,6 +75,10 @@ database:
     database: ''
     user: ''
     password: ''
+    # Use an already existing secret
+    existingSecret: ''
+    existingSecretUsernameKey: 'username'
+    existingSecretPasswordKey: 'password'
 
 #
 # Hook settings
@@ -85,4 +89,10 @@ hooks:
   #
   initializeDatabase:
     enabled: true
-    postgresImage: postgres:12.2
+    postgresImage: postgres:12.3
+  #
+  # Updates the provided database on chart update
+  #
+  upgradeDatabase:
+    enabled: true
+    postgresImage: postgres:12.3
