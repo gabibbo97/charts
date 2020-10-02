@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: quay.io/dexidp/dex
+  repository: dexidp/dex
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
