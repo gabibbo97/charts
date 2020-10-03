@@ -1,6 +1,10 @@
 {{- if .Values.frontend.ingress.enabled }}
 ---
+{{- if semverCompare ">=1.19.0" $.Capabilities.KubeVersion.Version }}
+apiVersion: networking.k8s.io/v1
+{{- else }}
 apiVersion: networking.k8s.io/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ include "guacamole.fullname" . }}-frontend
@@ -8,6 +12,13 @@ metadata:
   annotations: {{- .Values.frontend.ingress.annotations | toYaml | nindent 4 }}
   labels: {{- include "guacamole.labels.frontend" . | nindent 4 }}
 spec:
+  {{- if .Values.frontend.ingress.class }}
+  {{- if semverCompare ">=1.19.0" $.Capabilities.KubeVersion.Version }}
+  ingressClassName: {{ .Values.frontend.ingress.class }}
+  {{- else }}
+  {{- fail "Please set the kubernetes.io/ingress.class annotation instead" }}
+  {{- end }}
+  {{- end }}
   {{- if .Values.frontend.ingress.hosts }}
   rules:
     {{- range $i, $host := .Values.frontend.ingress.hosts }}
@@ -16,9 +27,18 @@ spec:
         paths:
           {{- range $j, $path := $host.paths }}
           - path: {{ $path }}
+          {{- if semverCompare ">=1.19.0" $.Capabilities.KubeVersion.Version }}
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "guacamole.fullname" $ }}-frontend
+                port:
+                  name: http
+          {{- else }}
             backend:
               serviceName: {{ include "guacamole.fullname" $ }}-frontend
               servicePort: http
+          {{- end }}
           {{- end }}
     {{- end }}
   {{- end }}

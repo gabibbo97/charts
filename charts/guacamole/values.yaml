@@ -47,6 +47,7 @@ frontend:
     minAvailable: 1
   ingress:
     enabled: false
+    class: 'nginx'
     annotations:
       nginx.ingress.kubernetes.io/app-root: /guacamole
       nginx.ingress.kubernetes.io/proxy-buffering: "off"
@@ -89,10 +90,10 @@ hooks:
   #
   initializeDatabase:
     enabled: true
-    postgresImage: postgres:12.3
+    postgresImage: postgres:13
   #
   # Updates the provided database on chart update
   #
   upgradeDatabase:
     enabled: true
-    postgresImage: postgres:12.3
+    postgresImage: postgres:13
