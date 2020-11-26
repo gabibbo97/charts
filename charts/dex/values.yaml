@@ -41,6 +41,8 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  # If this field is set, then the labels will be overridden by the ones specified here
+  labels: {}
   hosts:
     - host: chart-example.local
       paths: []

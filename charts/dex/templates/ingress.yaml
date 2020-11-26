@@ -10,7 +10,11 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
+    {{- if .Values.ingress.labels }}
+    {{- .Values.ingress.labels | toYaml | nindent 4 }}
+    {{- else }}
     {{- include "dex.labels" . | nindent 4 }}
+    {{- end }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
