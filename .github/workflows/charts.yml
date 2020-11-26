@@ -10,7 +10,7 @@ on:
       - charts/**/*
 jobs:
   helm-publish:
-    if: ${{ github.event_name == 'push' && github.ref == 'master' }}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: [helm-lint]
     steps:
