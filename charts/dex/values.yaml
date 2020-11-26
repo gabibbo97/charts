@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: dexidp/dex
+  repository: ghcr.io/dexidp/dex
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
