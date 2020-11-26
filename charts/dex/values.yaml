@@ -146,3 +146,10 @@ staticPasswords:
   # - email: "<email>"
   #   hash: "<bcrypt hash>"
   #   username: "<username>"
+
+# Manual configuration
+# If any of these is specified, then the automatic preformatted configuration is not used
+## Dex's config.yaml contents
+dexConfig: {}
+## Dex environment variables that will be stored as secrets
+dexEnvironment: {}

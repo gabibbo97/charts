@@ -78,3 +78,9 @@ staticClients:
 kubectl port-forward svc/dex 5555:http
 curl -k 127.0.0.1:5555/.well-known/openid-configuration | jq
 ```
+
+### Advanced configuration
+
+This chart provides a _plug and play_ installation of Dex.
+
+If you desire to manually configure Dex you can set up the variables `dexConfig` and `dexEnvironment` to have a completely custom installation of Dex.

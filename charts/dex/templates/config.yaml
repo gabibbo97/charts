@@ -55,7 +55,12 @@ metadata:
   labels:
     {{- include "dex.labels" . | nindent 4 }}
 data:
+  {{- if .Values.dexConfig }}
+  config.yaml: |-
+    {{- .Values.dexConfig | toYaml | nindent 4 }}
+  {{- else }}
   config.yaml: |- {{- include "dex.config" . | fromYaml | toYaml | nindent 4 }}
+  {{- end }}
 {{- if .Values.staticClients }}
 ---
 apiVersion: v1
@@ -65,8 +70,14 @@ metadata:
   labels:
     {{- include "dex.labels" . | nindent 4 }}
 data:
+  {{- if .Values.dexEnvironment }}
+  {{- range $k, $v := .Values.dexEnvironment }}
+  {{ $k }}: {{ $v | b64enc | quote }}
+  {{- end }}
+  {{- else }}
   {{- range $i, $connector := .Values.staticClients }}
   DEX_CLIENT_{{ $i }}_CLIENT_ID: {{ $connector.id | b64enc | quote }}
   DEX_CLIENT_{{ $i }}_CLIENT_SECRET: {{ $connector.secret | b64enc | quote }}
+  {{- end }}
   {{- end }}
 {{- end }}

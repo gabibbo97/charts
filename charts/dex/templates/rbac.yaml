@@ -5,7 +5,7 @@ kind: ServiceAccount
 metadata:
   name: {{ include "dex.serviceAccountName" . }}
   labels:
-{{ include "dex.labels" . | nindent 4 }}
+    {{- include "dex.labels" . | nindent 4 }}
 {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -13,7 +13,7 @@ kind: ClusterRole
 metadata:
   name: {{ include "dex.fullname" . }}
   labels:
-{{ include "dex.labels" . | nindent 4 }}
+    {{- include "dex.labels" . | nindent 4 }}
 rules:
 - apiGroups: ["dex.coreos.com"] # API group created by dex
   resources: ["*"]
@@ -27,7 +27,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ include "dex.fullname" . }}
   labels:
-{{ include "dex.labels" . | nindent 4 }}
+    {{- include "dex.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
