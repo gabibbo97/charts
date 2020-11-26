@@ -45,7 +45,7 @@ ingress:
   labels: {}
   hosts:
     - host: chart-example.local
-      paths: []
+      paths: ['/']
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

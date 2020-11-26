@@ -1,14 +1,50 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "dex.fullname" . -}}
-{{- $svcPort := .Values.service.http.port -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+{{/* Post 1.19 */}}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "dex.fullname" . }}
+  labels:
+    {{- if .Values.ingress.labels }}
+    {{- .Values.ingress.labels | toYaml | nindent 4 }}
+    {{- else }}
+    {{- include "dex.labels" . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- .Values.ingress.tls | toYaml | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range $i, $host := .Values.ingress.hosts }}
+    - host: {{ $host.host }}
+      http:
+        paths:
+          {{- range $j, $path := $host.paths }}
+          - path: {{ $path }}
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "dex.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.http.port }}
+          {{- end }}
+    {{- end }}
+{{- else }}
+{{/* Pre 1.19 */}}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" -}}
 apiVersion: networking.k8s.io/v1beta1
 {{- else -}}
 apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ include "dex.fullname" . }}
   labels:
     {{- if .Values.ingress.labels }}
     {{- .Values.ingress.labels | toYaml | nindent 4 }}
@@ -38,8 +74,9 @@ spec:
         {{- range .paths }}
           - path: {{ . }}
             backend:
-              serviceName: {{ $fullName }}
-              servicePort: {{ $svcPort }}
+              serviceName: {{ include "dex.fullname" $ }}
+              servicePort: {{ $.Values.service.http.port }}
         {{- end }}
   {{- end }}
+{{- end }}
 {{- end }}
