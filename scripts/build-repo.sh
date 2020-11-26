@@ -23,12 +23,13 @@ for commit in $(git rev-list --reverse HEAD -- 'charts/*/Chart.yaml'); do
         (cd "$TEMPDIR" && git checkout -q "$commit")
 
         # Package charts
-        git ls-tree --name-only -r "$commit" \
-            | grep -E '^charts/[^/]+/Chart\.yaml' \
-            | xargs dirname \
-            | sed -e 's|charts/||' \
-            | while read -r chartName; do
-
+        git diff-tree --no-commit-id --name-status -r "$commit" 'charts/*/Chart.yaml' | while read -r delta; do
+            MOD_KIND=$(echo "$delta" | awk '{ print $1 }')
+            MOD_FILE=$(echo "$delta" | awk '{ print $2 }')
+            # Parse only adds / modifications
+            if [ "$MOD_KIND" = "D" ]; then continue; fi
+            # Parse chart name
+            chartName=$(echo "$MOD_FILE" | xargs dirname | sed -e 's|charts/||')
             # Build chart
             helm dependency build "$TEMPDIR/charts/$chartName"
             helm package "$TEMPDIR/charts/$chartName" --destination "$PWD/repo"
