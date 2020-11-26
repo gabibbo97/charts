@@ -1,0 +1,5 @@
+{{- if not .Values.secretName }}
+#######################################
+# WARNING: No secretName has been set #
+#######################################
+{{- end }}
