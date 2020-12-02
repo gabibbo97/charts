@@ -32,8 +32,10 @@ connectors: {{ .Values.connectors | toYaml | nindent 2 }}
 staticClients:
   {{- range $i, $clientData := .Values.staticClients }}
   {{- $client := deepCopy $clientData }}
-  {{- $_ := set $client "id"     (printf "$DEX_CLIENT_%d_CLIENT_ID" $i) }}
-  {{- $_  = set $client "secret" (printf "$DEX_CLIENT_%d_CLIENT_SECRET" $i) }}
+  {{- $_ := unset $client "id" }}
+  {{- $_ := set $client "idEnv"     (printf "DEX_CLIENT_%d_CLIENT_ID" $i) }}
+  {{- $_ := unset $client "secret" }}
+  {{- $_  = set $client "secretEnv" (printf "DEX_CLIENT_%d_CLIENT_SECRET" $i) }}
   - {{ $client | toYaml | nindent 4 }}
   {{- end }}
 {{- end }}
