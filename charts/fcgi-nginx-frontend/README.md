@@ -2,6 +2,12 @@
 
 This chart allows exposing a FastCGI deployment via HTTP, this can be used with PHP-FPM and such
 
+## DEPRECATION NOTICE
+
+This has been deprecated because ingress controllers now offer this as a built-in functionality.
+
+See for instance the documentation of ingress-nginx on [exposing FastCGI servers](https://kubernetes.github.io/ingress-nginx/user-guide/fcgi-services).
+
 ## TL;DR
 
 ```bash

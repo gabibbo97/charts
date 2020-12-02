@@ -2,6 +2,10 @@
 
 Periodic daemonset allows scheduling a Pod across all nodes in the cluster
 
+## DEPRECATION NOTICE
+
+You can now achieve the same by leveraging the built in cronjobs
+
 ## TL;DR
 
 ```bash
