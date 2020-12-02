@@ -17,9 +17,16 @@ helm repo update
 
 ### Charts
 
-* [dex](charts/dex/README.md)
-* [fcgi-nginx-frontend](charts/fcgi-nginx-frontend/README.md)
-* [gangway](charts/gangway/README.md)
-* [imagepullsecrets](charts/imagepullsecrets/README.md)
-* [keycloak-gatekeeper](charts/keycloak-gatekeeper/README.md)
-* [periodic-daemonset](charts/periodic-daemonset/README.md)
+* [389ds](charts/389ds)
+* [dex](charts/dex)
+* [fcgi-nginx-frontend](charts/fcgi-nginx-frontend)
+* [gangway](charts/gangway)
+* [guacamole](charts/guacamole)
+* [imagepullsecrets](charts/imagepullsecrets)
+* [keycloak-gatekeeper](charts/keycloak-gatekeeper)
+* __DEPRECATED__ [kuberos](charts/kuberos)
+* [ldap-account-manager](charts/ldap-account-manager)
+* __DEPRECATED__ [mongodb](charts/mongodb)
+* [papermc](charts/papermc)
+* [periodic-daemonset](charts/periodic-daemonset)
+* __DEPRECATED__ [pullsecret](charts/pullsecret)
