@@ -36,6 +36,11 @@ spec:
               - key: tls.crt
                 path: tls.crt
         {{- end }}
+        {{- if .Values.customHTMLTemplates.enabled }}
+        - name: templates
+          configMap:
+            name: {{ include "gangway.fullname" . }}-templates
+        {{- end}}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -62,6 +67,10 @@ spec:
             {{- if or .Values.trustedCA.content .Values.trustedCA.secretName }}
             - name: trusted-ca
               mountPath: /etc/gangway/trusted-ca
+            {{- end }}
+            {{- if .Values.customHTMLTemplates.enabled }}
+            - name: templates
+              mountPath: /etc/gangway/templates
             {{- end }}
           livenessProbe:
             httpGet:
