@@ -102,3 +102,6 @@ config:
   # Security key
   # CHANGE THIS
   sessionSecurityKey: verySecureKey
+
+customHTMLTemplates:
+  enabled: false

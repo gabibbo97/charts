@@ -58,11 +58,26 @@ emailClaim: "${GANGWAY_EMAIL_CLAIM}"
 # Env var: GANGWAY_APISERVER_URL
 apiServerURL: "${GANGWAY_APISERVER_URL}"
 
+{{- if .Values.clusterCA }}
+# The path to find the CA bundle for the API server. Used to configure kubectl. 
+# This is typically mounted into the default location for workloads running on a 
+# Kubernetes cluster and doesn't need to be set. 
+# Needed when using with kube-oidc-proxy
+# Defaults to /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+clusterCAPath: "${GANGWAY_CLUSTER_CA_PATH}"
+{{- end}}
+
 {{- if or .Values.trustedCA.content .Values.trustedCA.secretName }}
 # The path to a root CA to trust for self signed certificates at the Oauth2 URLs
 # Env var: GANGWAY_TRUSTED_CA_PATH
 trustedCAPath: "${GANGWAY_TRUSTED_CA_PATH}"
 {{- end }}
+
+{{- if and .Values.customHTMLTemplates .Values.customHTMLTemplates.enabled }}
+# https://github.com/heptiolabs/gangway/blob/master/docs/custom-templates.md
+# Env var: GANGWAY_CUSTOM_HTML_TEMPLATES_DIR
+customHTMLTemplatesDir: "${GANGWAY_CUSTOM_HTML_TEMPLATES_DIR}"
+{{- end}}
 {{- end }}
 {{/* CA secret */}}
 {{- if .Values.trustedCA.content }}
@@ -109,7 +124,25 @@ data:
   {{- if or .Values.trustedCA.content .Values.trustedCA.secretName }}
   GANGWAY_TRUSTED_CA_PATH: "/etc/gangway/trusted-ca/tls.crt"
   {{- end }}
+  {{- if .Values.clusterCA }}
+  GANGWAY_CLUSTER_CA_PATH: "/etc/gangway/config/cluster-ca.crt"
+  {{- end}}
+  {{- if .Values.customHTMLTemplates.enabled }}
+  GANGWAY_CUSTOM_HTML_TEMPLATES_DIR: "/etc/gangway/templates"
+  {{- end}}
 ---
+{{- if .Values.customHTMLTemplates.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gangway.fullname" . }}-templates
+  labels:
+    {{- include "gangway.labels" . | nindent 4 }}
+data:
+  home.tmpl: |- {{ .Values.customHTMLTemplates.home | indent 4 }}
+  commandline.tmpl: |- {{ .Values.customHTMLTemplates.commandline | indent 4 }}
+---
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -117,4 +150,8 @@ metadata:
   labels:
     {{- include "gangway.labels" . | nindent 4 }}
 data:
+{{- if .Values.clusterCA }}
+  cluster-ca.crt: |- {{ .Values.clusterCA | indent 4 }}
+{{- end}}
   gangway.yaml: |- {{ include "gangway.config" . | fromYaml | toYaml | nindent 4 }}
+
