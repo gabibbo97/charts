@@ -28,7 +28,7 @@ spec:
           {{- range $j, $path := $host.paths }}
           - path: {{ $path }}
           {{- if semverCompare ">=1.19.0" $.Capabilities.KubeVersion.Version }}
-            pathType: Exact
+            pathType: Prefix
             backend:
               service:
                 name: {{ include "guacamole.fullname" $ }}-frontend
