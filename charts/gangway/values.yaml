@@ -103,5 +103,9 @@ config:
   # CHANGE THIS
   sessionSecurityKey: verySecureKey
 
+# if there is already an existingSecret holding sessionSecurityKey and clientSecret, define it here
+# secret must contain following keys: GANGWAY_CLIENT_SECRET, SESSION_SECURITY_KEY
+existingSecret:  ""
+
 customHTMLTemplates:
   enabled: false

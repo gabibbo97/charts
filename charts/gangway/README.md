@@ -39,6 +39,7 @@ You __MUST__ set a `config.sessionSecurityKey`
 | `config.usernameClaim`      | The OIDC username claim                                                   |                     `name`                      |
 | `config.emailClaim`         | The OIDC username claim                                                   |                     `email`                     |
 | `config.sessionSecurityKey` | The cookie security key                                                   |                 `verySecureKey`                 |
+| `existingSecret`            | Specify an existing secret containing clientSecret and sessionSecurityKey |                       ``                        |
 
 ## Use of a selfsigned certificate / custom CA
 

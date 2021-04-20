@@ -93,6 +93,7 @@ data:
 type: kubernetes.io/tls
 {{- end }}
 {{/* Environment secrets */}}
+{{- if not .Values.existingSecret }}
 ---
 apiVersion: v1
 kind: Secret
@@ -103,6 +104,7 @@ metadata:
 data:
   GANGWAY_CLIENT_SECRET: {{ .Values.config.clientSecret | b64enc | quote }}
   SESSION_SECURITY_KEY: {{ .Values.config.sessionSecurityKey | b64enc | quote }}
+{{- end }}
 {{/* ConfigMap */}}
 ---
 apiVersion: v1

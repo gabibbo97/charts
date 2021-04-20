@@ -60,7 +60,11 @@ spec:
             - configMapRef:
                 name: {{ include "gangway.fullname" . }}-env
             - secretRef:
+                {{- if .Values.existingSecret }}
+                name: {{ .Values.existingSecret }}
+                {{- else }}
                 name: {{ include "gangway.fullname" . }}
+                {{- end }}
           volumeMounts:
             - name: config
               mountPath: /etc/gangway/config
