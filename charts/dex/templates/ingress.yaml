@@ -27,7 +27,7 @@ spec:
         paths:
           {{- range $j, $path := $host.paths }}
           - path: {{ $path }}
-            pathType: Exact
+            pathType: Prefix
             backend:
               service:
                 name: {{ include "dex.fullname" $ }}
