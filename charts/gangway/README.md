@@ -40,6 +40,7 @@ You __MUST__ set a `config.sessionSecurityKey`
 | `config.emailClaim`         | The OIDC username claim                                                   |                     `email`                     |
 | `config.sessionSecurityKey` | The cookie security key                                                   |                 `verySecureKey`                 |
 | `existingSecret`            | Specify an existing secret containing clientSecret and sessionSecurityKey |                       ``                        |
+| `priorityClassName`         | Pod priority class name                                                   |                       ``                        |
 
 ## Use of a selfsigned certificate / custom CA
 
