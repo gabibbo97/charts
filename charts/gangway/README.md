@@ -41,6 +41,9 @@ You __MUST__ set a `config.sessionSecurityKey`
 | `config.sessionSecurityKey` | The cookie security key                                                   |                 `verySecureKey`                 |
 | `existingSecret`            | Specify an existing secret containing clientSecret and sessionSecurityKey |                       ``                        |
 | `priorityClassName`         | Pod priority class name                                                   |                       ``                        |
+| `podDisruptionBudget.enabled` | Enable Pod disruption budget                                            |                       `false`                   |
+| `podDisruptionBudget.minAvailable` | Pod disruption budget min available instance                       |                       ``                        |
+| `podDisruptionBudget.maxUnavailable` | Pod disruption budget max unavailable instance                   |                       ``                        |
 
 ## Use of a selfsigned certificate / custom CA
 

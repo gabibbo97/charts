@@ -4,6 +4,11 @@
 
 replicaCount: 1
 
+podDisruptionBudget:
+  enabled: false
+  minAvailable:
+  maxUnavailable:
+
 image:
   repository: gcr.io/heptio-images/gangway
   pullPolicy: IfNotPresent
