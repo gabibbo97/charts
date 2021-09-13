@@ -1,9 +1,9 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "gangway.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
+{{- if semverCompare ">=1.19.0" $.Capabilities.KubeVersion.Version }}
+apiVersion: networking.k8s.io/v1
+{{- else }}
 apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
@@ -16,6 +16,13 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+{{- if .Values.ingress.class }}
+{{- if semverCompare ">=1.19.0" $.Capabilities.KubeVersion.Version }}
+  ingressClassName: {{ .Values.ingress.class }}
+{{- else }}
+{{- fail "Please set the kubernetes.io/ingress.class annotation instead" }}
+{{- end }}
+{{- end }}
 {{- if .Values.ingress.tls }}
   tls:
   {{- range .Values.ingress.tls }}
@@ -31,11 +38,20 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-        {{- range .paths }}
+          {{- range .paths }}
           - path: {{ . }}
+          {{- if semverCompare ">=1.19.0" $.Capabilities.KubeVersion.Version }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "gangway.fullname" $ }}
+                port:
+                  name: http
+          {{- else }}
             backend:
               serviceName: {{ $fullName }}
               servicePort: {{ $svcPort }}
         {{- end }}
+  {{- end }}
   {{- end }}
 {{- end }}

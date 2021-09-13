@@ -90,7 +90,6 @@ metadata:
     {{- include "gangway.labels" . | nindent 4 }}
 data:
   tls.crt: {{ .Values.trustedCA.content | b64enc | quote }}
-type: kubernetes.io/tls
 {{- end }}
 {{/* Environment secrets */}}
 {{- if not .Values.existingSecret }}
