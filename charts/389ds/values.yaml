@@ -59,6 +59,10 @@ affinity: {}
 
 directoryManagerPassword: ''
 
+# example to create a backend
+#  sleep 3 && /usr/sbin/dsconf localhost backend create --suffix 'dc=example,dc=com' --be-name=userroot --create-entries --create-suffix && > /usr/share/message
+initCommand:
+
 clientCASecrets: []
 serverCertSecret: ''
 serverCertPasswordSecretName: ''

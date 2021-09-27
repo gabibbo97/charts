@@ -75,6 +75,12 @@ spec:
             - name: ldaps
               containerPort: 3636
               protocol: TCP
+          {{ if .Values.initCommand }}
+          lifecycle:
+            postStart:
+              exec:
+                command: [ "/bin/sh", "-c", {{ .Values.initCommand | quote }} ]
+          {{end}}
           volumeMounts:
             - name: data
               mountPath: /data
